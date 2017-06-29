@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { Injectable } from '@angular/core';
 
 /**
@@ -6,13 +7,31 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class Serializer {
 
-    public serialize(obj: any): string {
-        //TODO add support for custom fields, but priority goes to deserialization
-        return JSON.stringify(obj);
-    }
-
-    public deserialize(json: string): any {
-        //TODO add support for an advanced management, else, the library is useless.
-        return JSON.parse(json);
+    public deserialize<T>(obj: any, clazz?: {new(): any}): T {
+        //if the class parameter is not specified, we can directly return the basic object.
+        if (!clazz) {
+            return obj;
+        }
+        //First of all, we'll create an instance of our class
+        let result: T = new clazz();
+        //Then we copy every property of our object to our clazz
+        for (let prop in obj) {
+            if (obj.hasOwnProperty(prop)) {
+                let metadata: new() => any = Reflect.getMetadata('serialize:class', result, prop);
+                if (metadata !== undefined) {
+                    if (obj[prop] instanceof Array) {
+                        result[prop] = [];
+                        for (let item of obj[prop]) {
+                            result[prop].push(this.deserialize(item, metadata));
+                        }
+                    } else {
+                        result[prop] = this.deserialize(obj[prop], metadata);
+                    }
+                } else {
+                    result[prop] = obj[prop];
+                }
+            }
+        }
+        return result;
     }
 }
