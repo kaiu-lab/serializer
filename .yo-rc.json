@@ -1,0 +1,13 @@
+{
+  "generator-angular-library": {
+    "githubUsername": "Supamiu",
+    "githubRepoName": "ng-serializer",
+    "npmModuleName": "ng-serializer",
+    "moduleGlobal": "ngSerializer",
+    "ngModuleName": "NgSerializerModule",
+    "selectorPrefix": "null",
+    "projectTitle": "ng serializer",
+    "projectDescription": "",
+    "authorName": "Supamiu"
+  }
+}
