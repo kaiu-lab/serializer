@@ -9,7 +9,7 @@ import { TestBed, inject } from '@angular/core/testing';
 import { Serializer } from '../src/serializer';
 import { expect } from 'chai';
 import { DeserializeAs } from '../src/decorator/deserialize-as';
-import { Discriminant } from '../src/decorator/discriminant';
+import { ParentExample } from './parent-example';
 
 class Foo {
     public attrString: string;
@@ -38,6 +38,7 @@ class BazArray {
     @DeserializeAs(Bar)
     bars: Bar[];
 }
+
 
 describe('Serializer service', () => {
     beforeEach(() => {
@@ -175,6 +176,12 @@ describe('Serializer service', () => {
                         {prop: 'hey'}
                     ]
                 }, BazArray).bars[0].getProp()).to.eql('hey');
+        })));
+    });
+
+    describe('Inheritance tests', () => {
+        it('Should use discriminant field to find correct child', (inject([Serializer], (serializer: Serializer) => {
+            expect(serializer.deserialize<ParentExample>({type: 'child2'}, ParentExample).test()).to.eql('child2');
         })));
     });
 });
