@@ -45,10 +45,6 @@ export default {
         new webpack.DefinePlugin({
             ENV: JSON.stringify(IS_PROD ? 'production' : 'development')
         }),
-        new webpack.ContextReplacementPlugin(
-            /angular(\\|\/)core(\\|\/)@angular/,
-            path.join(__dirname, 'src')
-        ),
         new HtmlWebpackPlugin({
             template: path.join(__dirname, 'demo', 'index.ejs')
         })

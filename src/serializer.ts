@@ -1,20 +1,43 @@
 import 'reflect-metadata';
-import { Injectable } from '@angular/core';
-import { ParentOptions } from './decorator/parent-options';
+import { Registration } from './registration';
 
-/**
- * A simple service to inject where you need to be able to use serialization with more than JSON would do.
- */
-@Injectable()
 export class Serializer {
 
-    public deserialize<T>(obj: any, clazz?: {new(): T}): T {
+    /**
+     * Our current registrations for inheritance handling.
+     * @type {Array}
+     * @private
+     */
+    private _registrations: Registration[] = [];
+
+    /**
+     * Adds the given registrations to our current registration array.
+     * @param registration
+     */
+    public register(registration: Registration[]): void {
+        this._registrations = this._registrations.concat(registration);
+    }
+
+    /**
+     * Adds a class to a given basic object, adding the whole prototype of the class to the basic object.
+     * Example
+     * (given that you have a Foo class with a bar method)
+     *      let object = {'bla':'lol'};
+     *      let fooInstance = serializer.deserialize(object, Foo);
+     *      fooInstance.bar();//This will work.
+     *
+     * @param obj
+     * @param clazz
+     * @returns {any}
+     */
+    public deserialize<T>(obj: any, clazz?: any): T {
         //if the class parameter is not specified, we can directly return the basic object.
         if (!clazz) {
             return obj;
         }
+        Reflect.getMetadataKeys(clazz);
         //First of all, we'll create an instance of our class
-        let result: T = this.getInstance<T>(clazz);
+        let result: T = this.getInstance<T>(obj, clazz);
         //Then we copy every property of our object to our clazz
         for (let prop in obj) {
             //Simple check to avoid iterations over strange things.
@@ -40,17 +63,43 @@ export class Serializer {
         return result;
     }
 
-    private getInstance<T>(clazz: new() => T): T {
-        // We can't get metadata from the class itself, we have to create an instance of it first.
-        let instance: any = new clazz();
-        let metadata: ParentOptions = Reflect.getMetadata('serialize:parent', instance);
-        console.log('metadata', metadata);
+    /**
+     * Creates an instance of a given class using the base object to find which class we need,
+     * The base object will be used to get a possible discriminator value to be able to handle inheritance.
+     *
+     * @param obj The object we need a class for.
+     * @param clazz The base class of the object, can be an abstract class.
+     * @returns {any} An instance of the class we wanted.
+     */
+    private getInstance<T>(obj: any, clazz: new(...args: any[]) => T): T {
+        let discriminatorField: string = Reflect.getMetadata('serialize:discriminator', clazz);
         // If we don't have metadata for inheritance, we can return the instance of the class we created.
-        if (metadata === undefined) {
-            return instance;
-        } else {
-            return new metadata.children[new clazz()[metadata.discriminantField]]();
+        if (discriminatorField === undefined) {
+            return new clazz();
         }
+        let resultConstructor: new() => any = this.getClass(clazz, obj[discriminatorField]);
+        if (resultConstructor === null) {
+            throw new TypeError(`No class for ${clazz.name} class with discriminator value ${obj[discriminatorField]}`);
+        }
+        return new resultConstructor();
+    }
 
+    /**
+     * Used to get the class from our registrations using the parent class and the current discriminator value.
+     *
+     * @param parent The parent class of our current class.
+     * @param discriminatorValue The value of discriminator field we want to filter with.
+     * @returns constructor The constructor of the class we're looking for, or null if none is found.
+     */
+    private getClass(parent: any, discriminatorValue: string): new() => any {
+        let children: {[index: string]: {new(...args: any[]): any}} = {};
+        for (let entry of this._registrations) {
+            //If the parent of this entry is the one we're looking for or a child of the one we're looking for.
+            if (entry.parent.prototype instanceof parent || entry.parent === parent) {
+                //We add these children to our children array.
+                children = {...children, ...entry.children};
+            }
+        }
+        return children[discriminatorValue];
     }
 }

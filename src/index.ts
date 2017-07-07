@@ -1,1 +1,1 @@
-export * from './ng-serializer.module';
+export * from './serializer';

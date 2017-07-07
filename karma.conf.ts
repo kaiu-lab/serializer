@@ -1,5 +1,4 @@
 import * as webpack from 'webpack';
-import * as path from 'path';
 import * as ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 
 export default config => {
@@ -57,10 +56,6 @@ export default config => {
                     filename: null,
                     test: /\.(ts|js)($|\?)/i
                 }),
-                new webpack.ContextReplacementPlugin(
-                    /angular(\\|\/)core(\\|\/)@angular/,
-                    path.join(__dirname, 'src')
-                ),
                 ...(config.singleRun ? [
                         new webpack.NoEmitOnErrorsPlugin()
                     ] : [

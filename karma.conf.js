@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var webpack = require("webpack");
-var path = require("path");
 var ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 exports.default = function (config) {
     config.set({
@@ -51,8 +50,7 @@ exports.default = function (config) {
                 new webpack.SourceMapDevToolPlugin({
                     filename: null,
                     test: /\.(ts|js)($|\?)/i
-                }),
-                new webpack.ContextReplacementPlugin(/angular(\\|\/)core(\\|\/)@angular/, path.join(__dirname, 'src'))
+                })
             ].concat((config.singleRun ? [
                 new webpack.NoEmitOnErrorsPlugin()
             ] : [

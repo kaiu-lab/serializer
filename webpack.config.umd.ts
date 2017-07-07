@@ -42,10 +42,6 @@ export default {
             include: /\.min\.js$/,
             sourceMap: true
         }),
-        new webpack.ContextReplacementPlugin(
-            /angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
-            path.join(__dirname, 'src')
-        ),
         new webpack.BannerPlugin({
             banner: `
 /**
