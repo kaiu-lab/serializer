@@ -7,9 +7,6 @@
 [![GitHub stars](https://img.shields.io/github/stars/Supamiu/ng-serializer.svg)](https://github.com/Supamiu/ng-serializer/stargazers)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/Supamiu/ng-serializer/master/LICENSE)
 
-## Demo
-https://Supamiu.github.io/ng-serializer/
-
 ## Table of contents
 
 - [About](#about)
@@ -20,61 +17,46 @@ https://Supamiu.github.io/ng-serializer/
 
 ## About
 
-
+Serializer is a serialization library written in Typescript made to handle typing in deserialized objects.
 
 ## Installation
 
 Install through npm:
 ```
-npm install --save ng-serializer
-```
-
-Then include in your apps module:
-
-```typescript
-import { Component, NgModule } from '@angular/core';
-import { NgSerializerModule } from 'ng-serializer';
-
-@NgModule({
-  imports: [
-    NgSerializerModule.forRoot()
-  ]
-})
-export class MyModule {}
-```
-
-Finally use in one of your apps components:
-```typescript
-import { Component } from '@angular/core';
-
-@Component({
-  template: '<hello-world></hello-world>'
-})
-export class MyComponent {}
-```
-
-You may also find it useful to view the [demo source](https://github.com/Supamiu/ng-serializer/blob/master/demo/demo.component.ts).
-
-### Usage without a module bundler
-```
-<script src="node_modules/ng-serializer/bundles/ng-serializer.umd.js"></script>
-<script>
-    // everything is exported ngSerializer namespace
-</script>
+npm install --save serializer
 ```
 
 ## Documentation
-All documentation is auto-generated from the source via [compodoc](https://compodoc.github.io/compodoc/) and can be viewed here:
-https://Supamiu.github.io/ng-serializer/docs/
+
+### Simple usage
+Assuming you have a simple model class:
+```
+export class Foo{
+    public bar:string;
+    
+    public getBar():string{
+        return this.bar;
+    }
+}
+```
+
+You can simply do:
+
+```
+// Because the serializer doesn't handle strings, you have to JSON.parse it first.
+const data = JSON.parse('{"bar":"baz"}';
+new Serializer().deserialize<Foo>(jsonObject, Foo);
+```
+
+### In Progress
+While we're working on a good documentation, please refer to the tests for examples.
+
 
 ## Development
 
 ### Prepare your environment
 * Install [Node.js](http://nodejs.org/) and NPM
 * Install local dev dependencies: `npm install` while current directory is this repo
-
-### Development server
-Run `npm start` to start a development server on port 8000 with auto reload + tests.
 
 ### Testing
 Run `npm test` to run tests once or `npm run test:watch` to continually run tests.

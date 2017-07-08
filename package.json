@@ -6,7 +6,6 @@
   "module": "./index.js",
   "typings": "./index.d.ts",
   "scripts": {
-    "start": "concurrently --raw \"webpack-dev-server --open\" \"npm run test:watch\"",
     "build:demo": "webpack -p",
     "build:umd": "webpack --config webpack.config.umd.ts",
     "build:dist": "npm run build:umd",
@@ -47,7 +46,6 @@
     "@types/webpack": "^2.2.8",
     "chai": "^4.0.0",
     "codecov": "^2.1.0",
-    "codelyzer": "^3.0.0",
     "commitizen": "^2.8.1",
     "concurrently": "^3.0.0",
     "copyfiles": "^1.2.0",
