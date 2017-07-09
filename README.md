@@ -1,4 +1,4 @@
-# ng serializer
+# serializer
 [![Build Status](https://travis-ci.org/Supamiu/ng-serializer.svg?branch=master)](https://travis-ci.org/Supamiu/ng-serializer)
 [![codecov](https://codecov.io/gh/Supamiu/ng-serializer/branch/master/graph/badge.svg)](https://codecov.io/gh/Supamiu/ng-serializer)
 [![npm version](https://badge.fury.io/js/ng-serializer.svg)](http://badge.fury.io/js/ng-serializer)
