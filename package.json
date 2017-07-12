@@ -1,7 +1,7 @@
 {
-  "name": "ng-serializer",
+  "name": "@kaio/serializer",
   "version": "0.5.0",
-  "description": "",
+  "description": "Simple JSON deserializer for typescipt applications",
   "main": "./bundles/serializer.umd.js",
   "module": "./index.js",
   "typings": "./index.d.ts",

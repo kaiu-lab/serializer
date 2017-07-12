@@ -8,17 +8,16 @@ const pkg = JSON.parse(fs.readFileSync('./package.json').toString());
 
 export default {
     entry: {
-        'ng-serializer.umd': path.join(__dirname, 'src', 'index.ts'),
-        'ng-serializer.umd.min': path.join(__dirname, 'src', 'index.ts'),
+        'serializer.umd': path.join(__dirname, 'src', 'index.ts'),
+        'serializer.umd.min': path.join(__dirname, 'src', 'index.ts'),
     },
     output: {
         path: path.join(__dirname, 'dist', 'bundles'),
         filename: '[name].js',
         libraryTarget: 'umd',
-        library: 'ngSerializer'
+        library: 'serializer'
     },
     externals: [
-        angularExternals(),
         rxjsExternals()
     ],
     devtool: 'source-map',
