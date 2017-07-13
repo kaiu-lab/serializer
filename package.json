@@ -1,6 +1,6 @@
 {
     "name": "@kaiu/serializer",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "description": "Simple JSON deserializer for typescipt applications",
     "main": "./bundles/serializer.umd.js",
     "module": "./index.js",
@@ -18,7 +18,7 @@
         "release:git": "git add package.json && git commit -m \"chore: bump version number\" && standard-version --first-release && git push --follow-tags origin master",
         "release:npm": "npm run build:dist && npm run copyfiles && npm publish dist",
         "release": "npm run release:git && npm run release:npm",
-        "postrelease": "npm run build:clean && npm run gh-pages",
+        "postrelease": "npm run build:clean",
         "commitmsg": "validate-commit-msg",
         "codecov": "cat coverage/lcov.info | codecov"
     },
