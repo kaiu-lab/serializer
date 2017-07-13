@@ -1,6 +1,6 @@
 {
     "name": "@kaiu/serializer",
-    "version": "0.5.1",
+    "version": "0.5.2",
     "description": "Simple JSON deserializer for typescipt applications",
     "main": "./bundles/serializer.umd.js",
     "module": "./index.js",
@@ -74,6 +74,7 @@
         "tslint": "^5.1.0",
         "tslint-loader": "^3.5.3",
         "typescript": "^2.4.1",
+        "uglifyjs-webpack-plugin": "^0.4.6",
         "validate-commit-msg": "^2.8.0",
         "webpack": "^3.2.0",
         "webpack-angular-externals": "^1.0.0",
