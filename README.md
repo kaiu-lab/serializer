@@ -1,11 +1,11 @@
 # serializer
-[![Build Status](https://travis-ci.org/Supamiu/ng-serializer.svg?branch=master)](https://travis-ci.org/Supamiu/ng-serializer)
-[![codecov](https://codecov.io/gh/Supamiu/ng-serializer/branch/master/graph/badge.svg)](https://codecov.io/gh/Supamiu/ng-serializer)
-[![npm version](https://badge.fury.io/js/ng-serializer.svg)](http://badge.fury.io/js/ng-serializer)
-[![devDependency Status](https://david-dm.org/Supamiu/ng-serializer/dev-status.svg)](https://david-dm.org/Supamiu/ng-serializer?type=dev)
-[![GitHub issues](https://img.shields.io/github/issues/Supamiu/ng-serializer.svg)](https://github.com/Supamiu/ng-serializer/issues)
-[![GitHub stars](https://img.shields.io/github/stars/Supamiu/ng-serializer.svg)](https://github.com/Supamiu/ng-serializer/stargazers)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/Supamiu/ng-serializer/master/LICENSE)
+[![Build Status](https://travis-ci.org/kaiu-io/serializer.svg?branch=master)](https://travis-ci.org/kaiu-io/serializer)
+[![codecov](https://codecov.io/gh/kaiu-io/serializer/branch/master/graph/badge.svg)](https://codecov.io/gh/kaiu-io/serializer)
+[![npm version](https://badge.fury.io/js/@kaiu/serializer.svg)](http://badge.fury.io/js/@kaiu/serializer)
+[![devDependency Status](https://david-dm.org/kaiu-io/serializer/dev-status.svg)](https://david-dm.org/kaiu-io/serializer?type=dev)
+[![GitHub issues](https://img.shields.io/github/issues/kaiu-io/serializer.svg)](https://github.com/kaiu-io/serializer/issues)
+[![GitHub stars](https://img.shields.io/github/stars/kaiu-io/serializer.svg)](https://github.com/kaiu-io/serializer/stargazers)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/kaiu-io/serializer/master/LICENSE)
 
 ## Table of contents
 

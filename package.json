@@ -1,5 +1,5 @@
 {
-  "name": "@kaio/serializer",
+  "name": "@kaiu/serializer",
   "version": "0.5.0",
   "description": "Simple JSON deserializer for typescipt applications",
   "main": "./bundles/serializer.umd.js",
