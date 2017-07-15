@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.5.4"></a>
+## [0.5.4](https://github.com/kaiu-io/serializer/compare/v0.5.3...v0.5.4) (2017-07-15)
+
+
+
 <a name="0.5.3"></a>
 ## [0.5.3](https://github.com/kaiu-io/serializer/compare/v0.5.0...v0.5.3) (2017-07-13)
 
