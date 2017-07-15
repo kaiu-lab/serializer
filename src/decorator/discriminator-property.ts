@@ -5,7 +5,7 @@ import 'reflect-metadata';
  * Flags the given property as the discriminator,
  * meaning that the value of this property will be used to handle inheritance.
  */
-export function DiscriminatorProperty(name: string): (...args: any[]) => void {
+export default function DiscriminatorProperty(name: string): (...args: any[]) => void {
     return (target: any) => {
         return Reflect.defineMetadata('serialize:discriminator', name, target);
     };

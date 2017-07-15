@@ -3,8 +3,7 @@
     "version": "0.5.3",
     "description": "Simple JSON deserializer for typescipt applications",
     "main": "./bundles/serializer.umd.js",
-    "module": "./index.js",
-    "typings": "./index.d.ts",
+    "types": "./index.d.ts",
     "scripts": {
         "build:demo": "webpack -p",
         "build:umd": "webpack --config webpack.config.umd.ts",
@@ -52,6 +51,7 @@
         "core-js": "^2.4.1",
         "cz-conventional-changelog": "^2.0.0",
         "del-cli": "^1.0.0",
+        "dtsbundler-webpack-plugin": "^1.0.0",
         "fork-ts-checker-webpack-plugin": "^0.2.2",
         "html-webpack-plugin": "^2.28.0",
         "husky": "^0.14.3",
