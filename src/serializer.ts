@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Registration } from './registration';
+import {Registration} from './registration';
 
 export class Serializer {
 
@@ -77,8 +77,11 @@ export class Serializer {
         if (discriminatorField === undefined) {
             return new clazz();
         }
+        if (obj[discriminatorField] === undefined) {
+            return new clazz();
+        }
         let resultConstructor: new() => any = this.getClass(clazz, obj[discriminatorField]);
-        if (resultConstructor === null) {
+        if (resultConstructor === null || resultConstructor === undefined) {
             throw new TypeError(`No class for ${clazz.name} class with discriminator value ${obj[discriminatorField]}`);
         }
         return new resultConstructor();
@@ -92,7 +95,7 @@ export class Serializer {
      * @returns constructor The constructor of the class we're looking for, or null if none is found.
      */
     private getClass(parent: any, discriminatorValue: string): new() => any {
-        let children: {[index: string]: {new(...args: any[]): any}} = {};
+        let children: { [index: string]: { new(...args: any[]): any } } = {};
         for (let entry of this._registrations) {
             //If the parent of this entry is the one we're looking for or a child of the one we're looking for.
             if (entry.parent.prototype instanceof parent || entry.parent === parent) {
