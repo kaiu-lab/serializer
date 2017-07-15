@@ -5,7 +5,6 @@
     "main": "./bundles/serializer.umd.js",
     "types": "./index.d.ts",
     "scripts": {
-        "build:demo": "webpack -p",
         "build:umd": "webpack --config webpack.config.umd.ts",
         "build:dist": "npm run build:umd",
         "build:clean": "del-cli dist",

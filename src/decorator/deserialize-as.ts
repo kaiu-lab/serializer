@@ -4,7 +4,7 @@ import 'reflect-metadata';
  *
  * Tags a property to be deserialized as a given class, alowing the serializer to handle typed properties too.
  */
-export default function DeserializeAs(clazz: {new(...args: any[]): any}): (...args: any[]) => void {
+export function DeserializeAs(clazz: {new(...args: any[]): any}): (...args: any[]) => void {
     return (target: any, propertyKey: string) => {
         return Reflect.defineMetadata('serialize:class', clazz, target, propertyKey);
     };

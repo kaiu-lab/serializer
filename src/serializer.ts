@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { Registration } from './registration';
 
-export default class Serializer {
+export class Serializer {
 
     /**
      * Our current registrations for inheritance handling.
