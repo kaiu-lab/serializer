@@ -1,25 +1,21 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as webpack from 'webpack';
-import * as rxjsExternals from 'webpack-rxjs-externals';
 import * as UglifyJSPlugin from 'uglifyjs-webpack-plugin';
 
 const pkg = JSON.parse(fs.readFileSync('./package.json').toString());
 
 export default {
     entry: {
-        'serializer.umd': path.join(__dirname, 'src', 'index.ts'),
-        'serializer.umd.min': path.join(__dirname, 'src', 'index.ts'),
+        'bundles/serializer.umd': path.join(__dirname, 'src', 'index.ts'),
+        'bundles/serializer.umd.min': path.join(__dirname, 'src', 'index.ts'),
     },
     output: {
-        path: path.join(__dirname, 'dist', 'bundles'),
+        path: path.join(__dirname, 'dist'),
         filename: '[name].js',
         libraryTarget: 'umd',
         library: 'serializer'
     },
-    externals: [
-        rxjsExternals()
-    ],
     devtool: 'source-map',
     module: {
         rules: [{
@@ -29,7 +25,7 @@ export default {
             enforce: 'pre'
         }, {
             test: /\.ts$/,
-            loader: 'ts-loader',
+            loader: 'ts-loader?configFileName=tsconfig.prod.json',
             exclude: /node_modules/
         }]
     },

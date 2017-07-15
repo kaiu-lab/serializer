@@ -6,5 +6,5 @@
  */
 export interface Registration {
     parent: any;
-    children: {[index: string]: {new(...args: any[]): any}};
+    children: { [index: string]: { new(...args: any[]): any } };
 }

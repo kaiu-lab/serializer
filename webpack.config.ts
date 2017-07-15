@@ -2,6 +2,7 @@ import * as webpack from 'webpack';
 import * as path from 'path';
 import * as HtmlWebpackPlugin from 'html-webpack-plugin';
 import * as ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+import * as DtsBundlerPlugin from 'dtsbundler-webpack-plugin';
 
 const IS_PROD: boolean = process.argv.indexOf('-p') > -1;
 
@@ -37,11 +38,11 @@ export default {
     },
     plugins: [
         ...(IS_PROD ? [] : [
-                new webpack.HotModuleReplacementPlugin(),
-                new ForkTsCheckerWebpackPlugin({
-                    watch: ['./src', './demo']
-                })
-            ]),
+            new webpack.HotModuleReplacementPlugin(),
+            new ForkTsCheckerWebpackPlugin({
+                watch: ['./src', './demo']
+            })
+        ]),
         new webpack.DefinePlugin({
             ENV: JSON.stringify(IS_PROD ? 'production' : 'development')
         }),
