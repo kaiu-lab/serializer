@@ -22,7 +22,7 @@ Serializer is a serialization library written in Typescript made to handle typin
 ## Installation
 
 Install through npm:
-```
+```bash 
 npm install --save serializer
 ```
 
@@ -30,11 +30,11 @@ npm install --save serializer
 
 ### Simple usage
 Assuming you have a simple model class:
-```
-export class Foo{
-    public bar:string;
+```typescript
+export class Foo {
+    public bar: string;
     
-    public getBar():string{
+    public getBar(): string{
         return this.bar;
     }
 }
@@ -42,9 +42,9 @@ export class Foo{
 
 You can simply do:
 
-```
+```typescript
 // Because the serializer doesn't handle strings, you have to JSON.parse it first.
-const data = JSON.parse('{"bar":"baz"}';
+const data = JSON.parse( '{"bar":"baz"}' );
 new Serializer().deserialize<Foo>(jsonObject, Foo);
 ```
 
