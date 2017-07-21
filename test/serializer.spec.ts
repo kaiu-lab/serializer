@@ -1,9 +1,25 @@
 import { Serializer } from '../src/serializer';
 import { expect } from 'chai';
 import { DeserializeAs } from '../src/decorator/deserialize-as';
-import { ParentExample } from './parent-example';
-import { Child } from './child';
-import { GrandChild } from './grand-child';
+import { DiscriminatorProperty } from '../src/decorator/discriminator-property';
+
+@DiscriminatorProperty('type')
+abstract class ParentExample {
+    abstract test(): string;
+}
+
+@DiscriminatorProperty('child')
+class Child extends ParentExample {
+    test(): string {
+        return 'CHILD 1';
+    }
+}
+
+class GrandChild extends Child {
+    test(): string {
+        return 'GRAND CHILD';
+    }
+}
 
 class Foo {
     public attrString: string;
@@ -150,9 +166,6 @@ describe('Serializer service', () => {
 
     describe('Recursive deserialization tests', () => {
         it('Has to be able to handle object instance inside an object', (() => {
-            let example: Baz = new Baz();
-            example.bar = new Bar();
-            example.bar.prop = 'hey';
             expect(serializer.deserialize<Baz>({bar: {prop: 'hey'}}, Baz).bar.getProp()).to.eql('hey');
         }));
 
