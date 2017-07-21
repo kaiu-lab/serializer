@@ -1,6 +1,24 @@
 import 'reflect-metadata';
 import { Registration } from './registration';
 
+/**
+ * The main class of the serializer, used to deserialize `Objects` into class instances in order to add
+ * class's prototype to the object.
+ *
+ * ## Example:
+ * ```typescript
+ * class Bar {
+ *     prop: string;
+ *     getProp(): string {
+ *         return this.prop;
+ *     }
+ * }
+ * let serializer = new Serializer();
+ * let bar = serializer.deserialize<Bar>({bar: {prop: 'foo'}}, Bar);
+ * console.log(bar.getProp());
+ * ```
+ * This will print 'foo' to the console because bar is an instance of `Bar`, not a simple `Object` anymore.
+ */
 export class Serializer {
 
     /**
@@ -29,15 +47,13 @@ export class Serializer {
 
     /**
      * Adds a class to a given basic object, adding the whole prototype of the class to the basic object.
-     * Example
-     * (given that you have a Foo class with a bar method)
-     *      let object = {'bla':'lol'};
-     *      let fooInstance = serializer.deserialize(object, Foo);
-     *      fooInstance.bar();//This will work.
-     *
-     * @param obj
-     * @param clazz
-     * @returns {any}
+     * ## Example
+     * ```typescript
+     * serializer.deserialize<Bar>({bar: {prop: 'foo'}}, Bar);
+     * ```
+     * @param obj The object, usually coming from a simple `JSON.parse`
+     * @param clazz The class constructor.
+     * @returns {T} an instance of the type `T` with the prototype of `clazz` or one of its registered children.
      */
     public deserialize<T>(obj: any, clazz?: any): T {
         //if the class parameter is not specified, we can directly return the basic object.

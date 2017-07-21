@@ -1,9 +1,18 @@
 import 'reflect-metadata';
 /**
- * Created by Supamiu on 29/06/17.
+ * Flags the given property as the discriminator.
  *
- * Flags the given property as the discriminator,
- * meaning that the value of this property will be used to handle inheritance.
+ * ## Example:
+ * ```typescript
+ * @DiscriminatorField('type')
+ * export class Vehicle{
+ *      type: string;
+ *      color: Color;
+ * }
+ * ```
+ *
+ * When the serializer will deserialize using this class, he will use `Vehicle.type` value to find the right child.
+ * @decorator Class
  */
 export function DiscriminatorProperty(name: string): (...args: any[]) => void {
     return (target: any) => {
