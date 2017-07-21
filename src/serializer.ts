@@ -89,9 +89,6 @@ export class Serializer {
             return new clazz();
         }
         let resultConstructor: new() => any = this.getClass(clazz, obj, discriminatorField);
-        if (resultConstructor === null || resultConstructor === undefined) {
-            throw new TypeError(`No class for ${clazz.name} class with discriminator value ${obj[discriminatorField]}`);
-        }
         return new resultConstructor();
     }
 
@@ -115,7 +112,7 @@ export class Serializer {
             }
         }
         if (children[discriminatorValue] === undefined) {
-            return parent;
+            throw new TypeError(`No class for ${parent.name} class with discriminator value ${obj[discriminatorField]}`);
         }
         let childDiscriminatorField: string = Serializer.getDiscriminator(children[discriminatorValue]);
         // If the child used has children too.

@@ -39,6 +39,10 @@ describe('Serializer service', () => {
         serializer = new Serializer();
     });
 
+    it('Should have a working constructor', () => {
+        expect(new Serializer()).to.be.instanceof(Serializer);
+    });
+
     describe('Basic deserialization tests', () => {
 
         it('Should deserialize array of strings', (() => {
@@ -206,5 +210,24 @@ describe('Serializer service', () => {
                 child: 'grandchild'
             }, ParentExample).test()).to.eql('GRAND CHILD');
         }));
+
+        it('Should throw an error if no child is found with given discriminator', () => {
+            serializer.register([
+                {
+                    parent: ParentExample,
+                    children: {
+                        'child': Child
+                    }
+                },
+                {
+                    parent: Child,
+                    children: {
+                        'grandchild': GrandChild
+                    }
+                }
+            ]);
+            expect(() => serializer.deserialize<ParentExample>({type: 'fail'}, ParentExample))
+                .to.throw(TypeError, 'No class for ParentExample class with discriminator value fail');
+        });
     });
 });
