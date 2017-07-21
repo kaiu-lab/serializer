@@ -18,7 +18,9 @@
         "release": "npm run release:git && npm run release:npm",
         "postrelease": "npm run build:clean",
         "commitmsg": "validate-commit-msg",
-        "codecov": "cat coverage/lcov.info | codecov"
+        "codecov": "cat coverage/lcov.info | codecov",
+        "docs:generate": "npm run docs:clean && typedoc --out docs --excludePrivate --mode file --exclude \"**/*+(index|spec|entry).ts\" ./src",
+        "docs:clean": "del-cli docs/"
     },
     "repository": {
         "type": "git",
@@ -50,7 +52,6 @@
         "core-js": "^2.4.1",
         "cz-conventional-changelog": "^2.0.0",
         "del-cli": "^1.0.0",
-        "dtsbundler-webpack-plugin": "^1.0.0",
         "fork-ts-checker-webpack-plugin": "^0.2.2",
         "html-webpack-plugin": "^2.28.0",
         "husky": "^0.14.3",
@@ -72,6 +73,7 @@
         "ts-node": "^3.0.0",
         "tslint": "^5.1.0",
         "tslint-loader": "^3.5.3",
+        "typedoc": "^0.7.1",
         "typescript": "^2.4.1",
         "uglifyjs-webpack-plugin": "^0.4.6",
         "validate-commit-msg": "^2.8.0",
