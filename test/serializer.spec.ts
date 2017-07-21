@@ -8,7 +8,6 @@ import { GrandChild } from './grand-child';
 class Foo {
     public attrString: string;
     public attrNumber: number;
-    public attrBoolean: boolean;
 
     public getMe(): string {
         return this.attrString + ' - ' + this.attrNumber;
@@ -202,7 +201,10 @@ describe('Serializer service', () => {
                     }
                 }
             ]);
-            expect(serializer.deserialize<ParentExample>({type: 'grandchild'}, ParentExample).test()).to.eql('GRAND CHILD');
+            expect(serializer.deserialize<ParentExample>({
+                type: 'child',
+                child: 'grandchild'
+            }, ParentExample).test()).to.eql('GRAND CHILD');
         }));
     });
 });

@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import {Registration} from './registration';
+import { Registration } from './registration';
 
 export class Serializer {
 
@@ -9,6 +9,15 @@ export class Serializer {
      * @private
      */
     private _registrations: Registration[] = [];
+
+    /**
+     * Gets the discriminator field for a given class.
+     * @param clazz
+     * @returns string | undefined The discriminator field name if present, else undefined.
+     */
+    private static getDiscriminator(clazz: new(...args: any[]) => any): string | undefined {
+        return Reflect.getMetadata('serialize:discriminator', clazz);
+    }
 
     /**
      * Adds the given registrations to our current registration array.
@@ -35,7 +44,6 @@ export class Serializer {
         if (!clazz) {
             return obj;
         }
-        Reflect.getMetadataKeys(clazz);
         //First of all, we'll create an instance of our class
         let result: T = this.getInstance<T>(obj, clazz);
         //Then we copy every property of our object to our clazz
@@ -72,7 +80,7 @@ export class Serializer {
      * @returns {any} An instance of the class we wanted.
      */
     private getInstance<T>(obj: any, clazz: new(...args: any[]) => T): T {
-        let discriminatorField: string = Reflect.getMetadata('serialize:discriminator', clazz);
+        let discriminatorField: string = Serializer.getDiscriminator(clazz);
         // If we don't have metadata for inheritance, we can return the instance of the class we created.
         if (discriminatorField === undefined) {
             return new clazz();
@@ -80,7 +88,7 @@ export class Serializer {
         if (obj[discriminatorField] === undefined) {
             return new clazz();
         }
-        let resultConstructor: new() => any = this.getClass(clazz, obj[discriminatorField]);
+        let resultConstructor: new() => any = this.getClass(clazz, obj, discriminatorField);
         if (resultConstructor === null || resultConstructor === undefined) {
             throw new TypeError(`No class for ${clazz.name} class with discriminator value ${obj[discriminatorField]}`);
         }
@@ -91,18 +99,31 @@ export class Serializer {
      * Used to get the class from our registrations using the parent class and the current discriminator value.
      *
      * @param parent The parent class of our current class.
-     * @param discriminatorValue The value of discriminator field we want to filter with.
-     * @returns constructor The constructor of the class we're looking for, or null if none is found.
+     * @param obj The javascript object with data inside.
+     * @param discriminatorField The field used to discriminate children.
+     * @returns constructor The constructor of the class we're looking for, or the parent constructor if none is found.
      */
-    private getClass(parent: any, discriminatorValue: string): new() => any {
+    private getClass(parent: any, obj: any, discriminatorField: string): new() => any {
+        let discriminatorValue: string = obj[discriminatorField];
         let children: { [index: string]: { new(...args: any[]): any } } = {};
         for (let entry of this._registrations) {
-            //If the parent of this entry is the one we're looking for or a child of the one we're looking for.
-            if (entry.parent.prototype instanceof parent || entry.parent === parent) {
-                //We add these children to our children array.
+            // If the parent of this entry is the one we're looking for.
+            // This allows to declare a map for the same parent in different modules.
+            if (entry.parent === parent) {
+                // We add these children to our children array.
                 children = {...children, ...entry.children};
             }
         }
+        if (children[discriminatorValue] === undefined) {
+            return parent;
+        }
+        let childDiscriminatorField: string = Serializer.getDiscriminator(children[discriminatorValue]);
+        // If the child used has children too.
+        if (childDiscriminatorField !== undefined && childDiscriminatorField !== discriminatorField) {
+            return this.getClass(children[discriminatorValue], obj, childDiscriminatorField);
+        }
         return children[discriminatorValue];
     }
+
+
 }
