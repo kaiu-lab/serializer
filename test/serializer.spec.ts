@@ -224,23 +224,17 @@ describe('Serializer service', () => {
             }, ParentExample).test()).to.eql('GRAND CHILD');
         }));
 
-        it('Should throw an error if no child is found with given discriminator', () => {
+        it('Should throw an error if no children are found with given discriminator', () => {
             serializer.register([
                 {
                     parent: ParentExample,
                     children: {
                         'child': Child
                     }
-                },
-                {
-                    parent: Child,
-                    children: {
-                        'grandchild': GrandChild
-                    }
                 }
             ]);
             expect(() => serializer.deserialize<ParentExample>({type: 'fail'}, ParentExample))
-                .to.throw(TypeError, 'No class for ParentExample class with discriminator value fail');
+                .to.throw(TypeError, 'No matching subclass for parent class ParentExample with discriminator value fail');
         });
     });
 });

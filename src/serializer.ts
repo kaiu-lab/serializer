@@ -128,7 +128,7 @@ export class Serializer {
             }
         }
         if (children[discriminatorValue] === undefined) {
-            throw new TypeError(`No class for ${parent.name} class with discriminator value ${obj[discriminatorField]}`);
+            throw new TypeError(`No matching subclass for parent class ${parent.name} with discriminator value ${obj[discriminatorField]}`);
         }
         let childDiscriminatorField: string = Serializer.getDiscriminator(children[discriminatorValue]);
         // If the child used has children too.
