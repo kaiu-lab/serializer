@@ -28,28 +28,7 @@ npm install --save serializer
 
 ## Documentation
 
-### Simple usage
-Assuming you have a simple model class:
-```typescript
-export class Foo {
-    public bar: string;
-    
-    public getBar(): string{
-        return this.bar;
-    }
-}
-```
-
-You can simply do:
-
-```typescript
-// Because the serializer doesn't handle strings, you have to JSON.parse it first.
-const data = JSON.parse( '{"bar":"baz"}' );
-new Serializer().deserialize<Foo>(jsonObject, Foo);
-```
-
-### In Progress
-While we're working on a good documentation, please refer to the tests for examples.
+Everything is detailed on our [documentation website](https://kaiu-io.github.io/serializer/).
 
 
 ## Development
