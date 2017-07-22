@@ -14,6 +14,6 @@ import 'reflect-metadata';
  */
 export function DeserializeAs(clazz: { new(...args: any[]): any }): (...args: any[]) => void {
     return (target: any, propertyKey: string) => {
-        return Reflect.defineMetadata('serialize:class', clazz, target, propertyKey);
+        return Reflect.defineMetadata('serializer:class', clazz, target, propertyKey);
     };
 }

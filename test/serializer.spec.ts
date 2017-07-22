@@ -1,14 +1,19 @@
 import { Serializer } from '../src/serializer';
 import { expect } from 'chai';
 import { DeserializeAs } from '../src/decorator/deserialize-as';
-import { DiscriminatorProperty } from '../src/decorator/discriminator-property';
+import { Parent } from '../src/decorator/parent';
 
-@DiscriminatorProperty('type')
+@Parent({
+    discriminatorField: 'type'
+})
 abstract class ParentExample {
     abstract test(): string;
 }
 
-@DiscriminatorProperty('child')
+@Parent({
+    discriminatorField: 'child',
+    allowSelf: true
+})
 class Child extends ParentExample {
     test(): string {
         return 'CHILD 1';
