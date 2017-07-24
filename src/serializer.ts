@@ -43,6 +43,26 @@ export class Serializer {
      * @param registration
      */
     public register(registration: Registration[]): void {
+        for (const reg of registration) {
+
+            const parentOption: ParentOptions = Serializer.getParentOptions(reg.parent);
+
+            for (const value in reg.children) {
+                const child: { new(...args: any[]): any } = reg.children[value];
+
+                //Check if the child is the parent itself
+                if (child === reg.parent) {
+                    if (!parentOption.allowSelf) {
+                        throw new TypeError(`Class ${reg.parent.name} cannot be registered among its children`);
+                    }
+                } else {
+                    //Check if the child extends the parent
+                    if (!(child.prototype instanceof reg.parent)) {
+                        throw new TypeError(`Class ${child.name} needs to extend ${reg.parent.name} to be registered as a child`);
+                    }
+                }
+            }
+        }
         this._registrations = this._registrations.concat(registration);
     }
 
@@ -102,11 +122,35 @@ export class Serializer {
         if (parentOptions === undefined) {
             return new clazz();
         }
-        if (obj[parentOptions.discriminatorField] === undefined) {
+        const discriminatorValue: any = obj[parentOptions.discriminatorField];
+        // In case of missing discriminator value...
+        if (discriminatorValue === undefined || discriminatorValue === null) {
+            // ...check if the parent allows itself and no explicit discriminators are defined.
+            if (!parentOptions.allowSelf && !this.parentHasExplicitDiscriminator(clazz)) {
+                throw new TypeError(`Missing attribute type to discriminate the subclass of ${clazz.name}`);
+            }
+
             return new clazz();
         }
         let resultConstructor: new() => any = this.getClass(clazz, obj, parentOptions);
         return new resultConstructor();
+    }
+
+    private parentHasExplicitDiscriminator(clazz: new(...args: any[]) => any): boolean {
+        for (const reg of this._registrations) {
+            // Ignore registrations that does not concern this parent.
+            if (reg.parent !== clazz) {
+                continue;
+            }
+
+            for (const value in reg.children) {
+                if (reg.children[value] === clazz) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
