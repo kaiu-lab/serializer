@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { Registration } from './registration';
+import { ParentOptions } from './decorator/parent-options';
 
 /**
  * The main class of the serializer, used to deserialize `Objects` into class instances in order to add
@@ -33,8 +34,8 @@ export class Serializer {
      * @param clazz
      * @returns string | undefined The discriminator field name if present, else undefined.
      */
-    private static getDiscriminator(clazz: new(...args: any[]) => any): string | undefined {
-        return Reflect.getMetadata('serialize:discriminator', clazz);
+    private static getParentOptions(clazz: new(...args: any[]) => any): ParentOptions {
+        return Reflect.getMetadata('serializer:parent', clazz);
     }
 
     /**
@@ -42,6 +43,26 @@ export class Serializer {
      * @param registration
      */
     public register(registration: Registration[]): void {
+        for (const reg of registration) {
+
+            const parentOption: ParentOptions = Serializer.getParentOptions(reg.parent);
+
+            for (const value in reg.children) {
+                const child: { new(...args: any[]): any } = reg.children[value];
+
+                //Check if the child is the parent itself
+                if (child === reg.parent) {
+                    if (!parentOption.allowSelf) {
+                        throw new TypeError(`Class ${reg.parent.name} cannot be registered among its children`);
+                    }
+                } else {
+                    //Check if the child extends the parent
+                    if (!(child.prototype instanceof reg.parent)) {
+                        throw new TypeError(`Class ${child.name} needs to extend ${reg.parent.name} to be registered as a child`);
+                    }
+                }
+            }
+        }
         this._registrations = this._registrations.concat(registration);
     }
 
@@ -67,7 +88,7 @@ export class Serializer {
             //Simple check to avoid iterations over strange things.
             if (obj.hasOwnProperty(prop)) {
                 //We get our metadata for the class to deserialize
-                let metadata: new() => any = Reflect.getMetadata('serialize:class', result, prop);
+                let metadata: new() => any = Reflect.getMetadata('serializer:class', result, prop);
                 //If we have some metadata, we'll handle them
                 if (metadata !== undefined) {
                     if (obj[prop] instanceof Array) {
@@ -96,19 +117,40 @@ export class Serializer {
      * @returns {any} An instance of the class we wanted.
      */
     private getInstance<T>(obj: any, clazz: new(...args: any[]) => T): T {
-        let discriminatorField: string = Serializer.getDiscriminator(clazz);
+        const parentOptions: ParentOptions = Serializer.getParentOptions(clazz);
         // If we don't have metadata for inheritance, we can return the instance of the class we created.
-        if (discriminatorField === undefined) {
+        if (parentOptions === undefined) {
             return new clazz();
         }
-        if (obj[discriminatorField] === undefined) {
+        const discriminatorValue: any = obj[parentOptions.discriminatorField];
+        // In case of missing discriminator value...
+        if (discriminatorValue === undefined || discriminatorValue === null) {
+            // ...check if the parent allows itself and no explicit discriminators are defined.
+            if (!parentOptions.allowSelf && !this.parentHasExplicitDiscriminator(clazz)) {
+                throw new TypeError(`Missing attribute type to discriminate the subclass of ${clazz.name}`);
+            }
+
             return new clazz();
         }
-        let resultConstructor: new() => any = this.getClass(clazz, obj, discriminatorField);
-        if (resultConstructor === null || resultConstructor === undefined) {
-            throw new TypeError(`No class for ${clazz.name} class with discriminator value ${obj[discriminatorField]}`);
-        }
+        let resultConstructor: new() => any = this.getClass(clazz, obj, parentOptions);
         return new resultConstructor();
+    }
+
+    private parentHasExplicitDiscriminator(clazz: new(...args: any[]) => any): boolean {
+        for (const reg of this._registrations) {
+            // Ignore registrations that does not concern this parent.
+            if (reg.parent !== clazz) {
+                continue;
+            }
+
+            for (const value in reg.children) {
+                if (reg.children[value] === clazz) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -116,11 +158,11 @@ export class Serializer {
      *
      * @param parent The parent class of our current class.
      * @param obj The javascript object with data inside.
-     * @param discriminatorField The field used to discriminate children.
+     * @param options The Options used to configure the parent class.
      * @returns constructor The constructor of the class we're looking for, or the parent constructor if none is found.
      */
-    private getClass(parent: any, obj: any, discriminatorField: string): new() => any {
-        let discriminatorValue: string = obj[discriminatorField];
+    private getClass(parent: any, obj: any, options: ParentOptions): new() => any {
+        let discriminatorValue: string = obj[options.discriminatorField];
         let children: { [index: string]: { new(...args: any[]): any } } = {};
         for (let entry of this._registrations) {
             // If the parent of this entry is the one we're looking for.
@@ -131,12 +173,17 @@ export class Serializer {
             }
         }
         if (children[discriminatorValue] === undefined) {
-            return parent;
+            if (options.allowSelf) {
+                return parent;
+            } else {
+                throw new TypeError(`No matching subclass for parent class ${parent.name} ` +
+                    `with discriminator value ${obj[options.discriminatorField]}`);
+            }
         }
-        let childDiscriminatorField: string = Serializer.getDiscriminator(children[discriminatorValue]);
+        let childOptions: ParentOptions = Serializer.getParentOptions(children[discriminatorValue]);
         // If the child used has children too.
-        if (childDiscriminatorField !== undefined && childDiscriminatorField !== discriminatorField) {
-            return this.getClass(children[discriminatorValue], obj, childDiscriminatorField);
+        if (childOptions.discriminatorField !== undefined && childOptions.discriminatorField !== options.discriminatorField) {
+            return this.getClass(children[discriminatorValue], obj, childOptions);
         }
         return children[discriminatorValue];
     }

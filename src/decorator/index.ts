@@ -1,2 +1,2 @@
 export * from './deserialize-as';
-export * from './discriminator-property';
+export * from './parent';
