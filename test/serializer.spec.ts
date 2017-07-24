@@ -7,16 +7,20 @@ import { Parent } from '../src/decorator/parent';
     discriminatorField: 'type'
 })
 class ParentExample {
-    test(): string {
-        return 'PARENT';
-    }
+}
+
+@Parent({
+    discriminatorField: 'type'
+})
+abstract class AbstractParentExample {
+    abstract test(): string;
 }
 
 @Parent({
     discriminatorField: 'child',
     allowSelf: true
 })
-class Child extends ParentExample {
+class Child extends AbstractParentExample {
     test(): string {
         return 'CHILD 1';
     }
@@ -207,19 +211,19 @@ describe('Serializer service', () => {
         it('Should use discriminant field to find correct child', (() => {
             serializer.register([
                 {
-                    parent: ParentExample,
+                    parent: AbstractParentExample,
                     children: {
                         'child': Child
                     }
                 }
             ]);
-            expect(serializer.deserialize<ParentExample>({type: 'child'}, ParentExample).test()).to.eql('CHILD 1');
+            expect(serializer.deserialize<AbstractParentExample>({type: 'child'}, AbstractParentExample).test()).to.eql('CHILD 1');
         }));
 
         it('Should handle child of child', (() => {
             serializer.register([
                 {
-                    parent: ParentExample,
+                    parent: AbstractParentExample,
                     children: {
                         'child': Child
                     }
@@ -231,34 +235,34 @@ describe('Serializer service', () => {
                     }
                 }
             ]);
-            expect(serializer.deserialize<ParentExample>({
+            expect(serializer.deserialize<AbstractParentExample>({
                 type: 'child',
                 child: 'grandchild'
-            }, ParentExample).test()).to.eql('GRAND CHILD');
+            }, AbstractParentExample).test()).to.eql('GRAND CHILD');
         }));
 
         it('Should throw an error if no children are found with given discriminator', () => {
             serializer.register([
                 {
-                    parent: ParentExample,
+                    parent: AbstractParentExample,
                     children: {
                         'child': Child
                     }
                 }
             ]);
-            expect(() => serializer.deserialize<ParentExample>({type: 'fail'}, ParentExample))
-                .to.throw(TypeError, 'No matching subclass for parent class ParentExample with discriminator value fail');
+            expect(() => serializer.deserialize<AbstractParentExample>({type: 'fail'}, AbstractParentExample))
+                .to.throw(TypeError, 'No matching subclass for parent class AbstractParentExample with discriminator value fail');
         });
 
         it('Should throw an error if the children does not extends the parent', () => {
             expect(() => serializer.register([
                 {
-                    parent  : ParentExample,
+                    parent  : AbstractParentExample,
                     children: {
                         'foo': Foo,
                     },
                 },
-            ])).to.throw(TypeError, 'Class Foo needs to extend ParentExample to be registered as a child');
+            ])).to.throw(TypeError, 'Class Foo needs to extend AbstractParentExample to be registered as a child');
         });
 
         it('Should throw an error if the parent is registered among the children without allowing itself', () => {
@@ -266,7 +270,6 @@ describe('Serializer service', () => {
                 {
                     parent  : ParentExample,
                     children: {
-                        'child' : Child,
                         'parent': ParentExample,
                     },
                 },
@@ -305,31 +308,20 @@ describe('Serializer service', () => {
         });
 
         it('Should throw if the parent discriminator is explicitly defined and the discriminator value is missing', () => {
-            serializer.register([
-                    {
-                        parent  : Child,
-                        children: {
-                            'child'     : Child,
-                            'grandchild': GrandChild,
-                        },
-                    },
-                ],
-            );
+            const expectedError: string = 'Missing attribute type to discriminate the subclass of AbstractParentExample';
 
-            const expectedError: string = 'Missing attribute type to discriminate the subclass of ParentExample';
-
-            expect(() => serializer.deserialize<ParentExample>({type: null}, ParentExample))
+            expect(() => serializer.deserialize<AbstractParentExample>({type: null}, AbstractParentExample))
                 .to.throw(TypeError, expectedError);
-            expect(() => serializer.deserialize<ParentExample>({type: undefined}, ParentExample))
+            expect(() => serializer.deserialize<AbstractParentExample>({type: undefined}, AbstractParentExample))
                 .to.throw(TypeError, expectedError);
-            expect(() => serializer.deserialize<ParentExample>({}, ParentExample))
+            expect(() => serializer.deserialize<AbstractParentExample>({}, AbstractParentExample))
                 .to.throw(TypeError, expectedError);
         });
 
         it('Should throw an error if the discriminator is null or undefined and the parent does not allow itself', () => {
             serializer.register([
                     {
-                        parent  : ParentExample,
+                        parent  : AbstractParentExample,
                         children: {
                             'child': Child,
                         },
@@ -337,13 +329,13 @@ describe('Serializer service', () => {
                 ],
             );
 
-            const expectedError: string = 'Missing attribute type to discriminate the subclass of ParentExample';
+            const expectedError: string = 'Missing attribute type to discriminate the subclass of AbstractParentExample';
 
-            expect(() => serializer.deserialize<ParentExample>({type: null}, ParentExample))
+            expect(() => serializer.deserialize<AbstractParentExample>({type: null}, AbstractParentExample))
                 .to.throw(TypeError, expectedError);
-            expect(() => serializer.deserialize<ParentExample>({type: undefined}, ParentExample))
+            expect(() => serializer.deserialize<AbstractParentExample>({type: undefined}, AbstractParentExample))
                 .to.throw(TypeError, expectedError);
-            expect(() => serializer.deserialize<ParentExample>({}, ParentExample))
+            expect(() => serializer.deserialize<AbstractParentExample>({}, AbstractParentExample))
                 .to.throw(TypeError, expectedError);
         });
     });
