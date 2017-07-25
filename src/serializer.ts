@@ -42,14 +42,14 @@ export class Serializer {
     public register(registration: Registration[]): void {
         for (const reg of registration) {
 
-            const parentOption = Serializer.getParentOptions(reg.parent);
+            const parentOptions = Serializer.getParentOptions(reg.parent);
 
             for (const value in reg.children) {
                 const child = reg.children[value];
 
                 //Check if the child is the parent itself
                 if (child === reg.parent) {
-                    if (!parentOption.allowSelf) {
+                    if (!parentOptions.allowSelf) {
                         throw new TypeError(`Class ${reg.parent.name} cannot be registered among its children`);
                     }
                 } else {
