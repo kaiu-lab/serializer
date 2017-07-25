@@ -175,7 +175,7 @@ describe('Serializer service', () => {
         }));
 
         it('Should deserialize class instance', (() => {
-            let res: Foo = serializer.deserialize<Foo>({
+            const res = serializer.deserialize<Foo>({
                 'attrString': 'val',
                 'attrNumber': 5,
                 'attrBoolean': true
@@ -191,8 +191,8 @@ describe('Serializer service', () => {
         }));
 
         it('Has to be able to handle object instances array inside an object', (() => {
-            let example: BazArray = new BazArray();
-            let bar: Bar = new Bar();
+            const example = new BazArray();
+            const bar = new Bar();
             bar.prop = 'hey';
             example.bars = [];
             example.bars.push(bar);
@@ -308,7 +308,7 @@ describe('Serializer service', () => {
         });
 
         it('Should throw if the parent discriminator is explicitly defined and the discriminator value is missing', () => {
-            const expectedError: string = 'Missing attribute type to discriminate the subclass of AbstractParentExample';
+            const expectedError = 'Missing attribute type to discriminate the subclass of AbstractParentExample';
 
             expect(() => serializer.deserialize<AbstractParentExample>({type: null}, AbstractParentExample))
                 .to.throw(TypeError, expectedError);
@@ -329,7 +329,7 @@ describe('Serializer service', () => {
                 ],
             );
 
-            const expectedError: string = 'Missing attribute type to discriminate the subclass of AbstractParentExample';
+            const expectedError = 'Missing attribute type to discriminate the subclass of AbstractParentExample';
 
             expect(() => serializer.deserialize<AbstractParentExample>({type: null}, AbstractParentExample))
                 .to.throw(TypeError, expectedError);

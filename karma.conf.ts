@@ -1,7 +1,7 @@
 import * as webpack from 'webpack';
-import * as ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+const ForkTsCheckerWebpackPlugin: any = require('fork-ts-checker-webpack-plugin');
 
-export default config => {
+export default (config: any) => {
 
     config.set({
 

@@ -19,6 +19,7 @@
         "no-duplicate-variable": true,
         "no-empty": true,
         "no-eval": true,
+        "no-inferrable-types": true,
         "no-trailing-whitespace": true,
         "no-unused-expression": true,
         "one-line": [
@@ -28,6 +29,7 @@
             "check-else",
             "check-whitespace"
         ],
+        "prefer-const": true,
         "quotemark": [
             true,
             "single"
@@ -37,23 +39,45 @@
             true,
             "allow-null-check"
         ],
-        "variable-name": false,
+        "variable-name": [
+            true,
+            "check-format",
+            "ban-keywords",
+            "allow-leading-underscore",
+            "allow-pascal-case"
+        ],
         "whitespace": [
             true,
             "check-branch",
             "check-decl",
             "check-operator",
+            "check-module",
             "check-separator",
-            "check-type"
+            "check-type",
+            "check-typecast",
+            "check-preblock"
         ],
         "typedef": [
-            true,
-            "call-signature",
-            "parameter",
-            "property-declaration",
-            "variable-declaration",
-            "member-variable-declaration"
+            true
         ],
-        "no-access-missing-member": false
+        "typedef-whitespace": [
+            true,
+            {
+                "call-signature": "nospace",
+                "index-signature": "nospace",
+                "parameter": "nospace",
+                "property-declaration": "nospace",
+                "variable-declaration": "nospace"
+            },
+            {
+                "call-signature": "onespace",
+                "index-signature": "onespace",
+                "parameter": "onespace",
+                "property-declaration": "onespace",
+                "variable-declaration": "onespace"
+            }
+        ],
+        "no-access-missing-member": false,
+        "no-unnecessary-type-assertion": false
     }
 }

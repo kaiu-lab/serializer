@@ -1,7 +1,8 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as webpack from 'webpack';
-import * as UglifyJSPlugin from 'uglifyjs-webpack-plugin';
+
+const UglifyJSPlugin: any = require('uglifyjs-webpack-plugin');
 
 const pkg = JSON.parse(fs.readFileSync('./package.json').toString());
 
