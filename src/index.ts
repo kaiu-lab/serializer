@@ -1,3 +1,4 @@
-export * from './serializer';
-export * from './registration';
 export * from './decorator/index';
+export * from './instantiable';
+export * from './registration';
+export * from './serializer';
