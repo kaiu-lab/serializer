@@ -129,8 +129,8 @@ export class Serializer {
 
             return new clazz();
         }
-        const resultConstructor = this.getClass(clazz, obj, parentOptions);
-        return new resultConstructor();
+        const resultInstantiable = this.getClass(clazz, obj, parentOptions);
+        return new resultInstantiable();
     }
 
     /**
