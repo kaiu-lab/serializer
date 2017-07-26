@@ -5,6 +5,8 @@ import { ParentOptions } from './parent-options';
  *
  * ## Example:
  * ```typescript
+ * *note: the \@ is only here because of a bug in the documentation library we're using, you should use @Parent*
+ *
  * \@Parent({
  *              discriminatorField: 'type',
  *              allowSelf: true // This one is optional.
