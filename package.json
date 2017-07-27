@@ -24,7 +24,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/kaiu-io/serializer.git"
+        "url": "git+https://github.com/kaiu-lab/serializer.git"
     },
     "keywords": [
         "typescript",
@@ -44,9 +44,9 @@
     ],
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/kaiu-io/serializer/issues"
+        "url": "https://github.com/kaiu-lab/serializer/issues"
     },
-    "homepage": "https://github.com/kaiu-io/serializer#readme",
+    "homepage": "https://github.com/kaiu-lab/serializer#readme",
     "devDependencies": {
         "@types/chai": "^4.0.0",
         "@types/mocha": "^2.2.41",
