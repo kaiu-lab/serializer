@@ -16,7 +16,7 @@ import { Instantiable } from './instantiable';
  *     }
  * }
  * let serializer = new Serializer();
- * let bar = serializer.deserialize<Bar>({bar: {prop: 'foo'}}, Bar);
+ * let bar = serializer.deserialize<Bar>({ prop: 'foo' }, Bar);
  * console.log(bar.getProp());
  * ```
  * This will print 'foo' to the console because bar is an instance of `Bar`, not a simple `Object` anymore.
@@ -37,7 +37,21 @@ export class Serializer {
 
     /**
      * Adds the given registrations to our current registration array.
-     * @param registration
+     *
+     * ## Example:
+     * ```typescript
+     * let serializer = new Serializer();
+     * serializer.register([
+     *      {
+     *          parent: Foo,
+     *          children: {
+     *              'bar':Bar,
+     *              'baz':Baz
+     *          }
+     *      }
+     * ]);
+     * ```
+     * @param registration The `Registration` array we want to register.
      */
     public register(registration: Registration[]): void {
         for (const reg of registration) {
@@ -67,7 +81,7 @@ export class Serializer {
      * Adds a class to a given basic object, adding the whole prototype of the class to the basic object.
      * ## Example
      * ```typescript
-     * serializer.deserialize<Bar>({bar: {prop: 'foo'}}, Bar);
+     * serializer.deserialize<Bar>({ prop: 'foo' }, Bar);
      * ```
      * @param obj The object, usually coming from a simple `JSON.parse`
      * @param clazz The class constructor.
