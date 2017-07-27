@@ -2,6 +2,7 @@ import { Serializer } from '../src/serializer';
 import { expect } from 'chai';
 import { DeserializeAs } from '../src/decorator/deserialize-as';
 import { Parent } from '../src/decorator/parent';
+import { Deserialize } from '../src/decorator/deserialize';
 
 @Parent({
     discriminatorField: 'type'
@@ -63,6 +64,40 @@ class Baz {
 class BazArray {
     @DeserializeAs(Bar)
     bars: Bar[];
+}
+
+class DifferentFieldName {
+    @Deserialize('foo')
+    bar: string;
+}
+
+class DifferentFieldNames {
+    @Deserialize('foo')
+    bar: string;
+
+    @Deserialize('name')
+    firstName: string;
+
+    @Deserialize('count')
+    length: number;
+}
+
+class NotOnlyDifferentFieldName {
+    @Deserialize('foo')
+    bar: string;
+
+    hey: string;
+}
+
+class DifferentFieldNameWithClass {
+    @DeserializeAs(Bar)
+    @Deserialize('foo')
+    bar: Bar;
+}
+
+class DifferentFieldNameArray {
+    @Deserialize('foo')
+    bar: number[];
 }
 
 
@@ -257,7 +292,7 @@ describe('Serializer service', () => {
         it('Should throw an error if the children does not extends the parent', () => {
             expect(() => serializer.register([
                 {
-                    parent  : AbstractParentExample,
+                    parent: AbstractParentExample,
                     children: {
                         'foo': Foo,
                     },
@@ -268,7 +303,7 @@ describe('Serializer service', () => {
         it('Should throw an error if the parent is registered among the children without allowing itself', () => {
             expect(() => serializer.register([
                 {
-                    parent  : ParentExample,
+                    parent: ParentExample,
                     children: {
                         'parent': ParentExample,
                     },
@@ -279,7 +314,7 @@ describe('Serializer service', () => {
         it('Should handle a null or undefined discriminator value if the parent allows itself', () => {
             serializer.register([
                     {
-                        parent  : Child,
+                        parent: Child,
                         children: {
                             'grandchild': GrandChild,
                         },
@@ -295,9 +330,9 @@ describe('Serializer service', () => {
         it('Should handle the parent discriminator value if it allows itself', () => {
             serializer.register([
                     {
-                        parent  : Child,
+                        parent: Child,
                         children: {
-                            'child'     : Child,
+                            'child': Child,
                             'grandchild': GrandChild,
                         },
                     },
@@ -321,7 +356,7 @@ describe('Serializer service', () => {
         it('Should throw an error if the discriminator is null or undefined and the parent does not allow itself', () => {
             serializer.register([
                     {
-                        parent  : AbstractParentExample,
+                        parent: AbstractParentExample,
                         children: {
                             'child': Child,
                         },
@@ -344,7 +379,7 @@ describe('Serializer service', () => {
         it('Should allow multiple registration of the same class under multiple discriminator value', () => {
             serializer.register([
                     {
-                        parent  : Child,
+                        parent: Child,
                         children: {
                             'grandchild': GrandChild,
                             'otherchild': GrandChild,
@@ -360,13 +395,13 @@ describe('Serializer service', () => {
         it('Should allow to override a discriminator value with an other class', () => {
             serializer.register([
                     {
-                        parent  : Child,
+                        parent: Child,
                         children: {
                             'grandchild': GrandChild,
                         },
                     },
                     {
-                        parent  : Child,
+                        parent: Child,
                         children: {
                             'grandchild': OtherGrandChild,
                         },
@@ -378,7 +413,7 @@ describe('Serializer service', () => {
 
             serializer.register([
                     {
-                        parent  : Child,
+                        parent: Child,
                         children: {
                             'grandchild': GrandChild,
                         },
@@ -387,6 +422,48 @@ describe('Serializer service', () => {
             );
 
             expect(serializer.deserialize<Child>({child: 'grandchild'}, Child).test()).to.eql('GRAND CHILD');
+        });
+    });
+
+    describe('Property name binding', () => {
+
+        it('Should be able to use a different field name', () => {
+            const obj = {foo: 'okay'};
+            const res = serializer.deserialize<DifferentFieldName>(obj, DifferentFieldName);
+            expect(res.bar).to.eq(obj.foo);
+        });
+
+        it('Should be able to use multiple different field names', () => {
+            const obj = {foo: 'okay', name: 'testing', count: 5};
+            const res = serializer.deserialize<DifferentFieldNames>(obj, DifferentFieldNames);
+            expect(res.bar).to.eq(obj.foo);
+            expect(res.firstName).to.eq(obj.name);
+            expect(res.length).to.eq(obj.count);
+        });
+
+        it('Should be able to use a different field name with default bindings in the same class', () => {
+            const obj = {foo: 'okay', hey: 'hoo'};
+            const res = serializer.deserialize<NotOnlyDifferentFieldName>(obj, NotOnlyDifferentFieldName);
+            expect(res.bar).to.eq(obj.foo);
+            expect(res.hey).to.eq(obj.hey);
+        });
+
+        it('Should be able to use a different field name with class binding', () => {
+            const obj = {
+                foo: {
+                    prop: 'success'
+                }
+            };
+            const res = serializer.deserialize<DifferentFieldNameWithClass>(obj, DifferentFieldNameWithClass);
+            expect(res.bar.getProp()).to.eq(obj.foo.prop);
+        });
+
+        it('Should be able to use a different field name with array', () => {
+            const obj = {
+                foo: [1, 2, 3, 4]
+            };
+            const res = serializer.deserialize<DifferentFieldNameArray>(obj, DifferentFieldNameArray);
+            expect(res.bar).to.eq(obj.foo);
         });
     });
 });

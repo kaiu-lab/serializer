@@ -36,6 +36,37 @@ export class Serializer {
     }
 
     /**
+     * Returns the fields used to map data properties on result's ones.
+     *
+     * @param instance An instance of the class we're using.
+     * @param obj The current object we're deserializing.
+     * @returns A custom array containing obj's field as index and corresponding result's field as value.
+     */
+    private static getPropertyMap(obj: any, instance: any): { [index: string]: string } {
+        const propsMap: { [index: string]: string } = {};
+        //We create a first property map based on obj's properties.
+        for (const prop in obj) {
+            //Simple check to avoid iterations over strange things.
+            if (obj.hasOwnProperty(prop)) {
+                //The initial map will have identical keys and values.
+                propsMap[prop] = prop;
+            }
+        }
+        //We get our metadata registry for custom properties
+        const customProperties = Reflect.getMetadata('serializer:field:properties', instance);
+        if (customProperties === undefined) {
+            //If we don't have custom properties, going further is useless.
+            return propsMap;
+        }
+        //Using our custom properties
+        for (const property of customProperties) {
+            //We override current properties with the ones defined as custom.
+            propsMap[Reflect.getMetadata('serializer:field', instance, property)] = property;
+        }
+        return propsMap;
+    }
+
+    /**
      * Adds the given registrations to our current registration array.
      *
      * ## Example:
@@ -94,26 +125,25 @@ export class Serializer {
         }
         //First of all, we'll create an instance of our class
         const result: any = this.getInstance<T>(obj, clazz);
-        //Then we copy every property of our object to our clazz
-        for (const prop in obj) {
-            //Simple check to avoid iterations over strange things.
-            if (obj.hasOwnProperty(prop)) {
-                //We get our metadata for the class to deserialize
-                const metadata: new() => any = Reflect.getMetadata('serializer:class', result, prop);
-                //If we have some metadata, we'll handle them
-                if (metadata !== undefined) {
-                    if (obj[prop] instanceof Array) {
-                        result[prop] = [];
-                        for (const item of obj[prop]) {
-                            result[prop].push(this.deserialize(item, metadata));
-                        }
-                    } else {
-                        result[prop] = this.deserialize(obj[prop], metadata);
+        //And we get the property binding map.
+        const properties = Serializer.getPropertyMap(obj, result);
+        //Then we copy every property of our object to our instance, using bindings.
+        for (const prop in properties) {
+            //We get our metadata for the class to deserialize.
+            const className: new() => any = Reflect.getMetadata('serializer:class', result, properties[prop]);
+            //If we have some class-related metadata, we'll handle them.
+            if (className !== undefined) {
+                if (obj[prop] instanceof Array) {
+                    result[properties[prop]] = [];
+                    for (const item of obj[prop]) {
+                        result[properties[prop]].push(this.deserialize(item, className));
                     }
                 } else {
-                    //Else we can copy the object as it is, since we don't need to create a specific object instance.
-                    result[prop] = obj[prop];
+                    result[properties[prop]] = this.deserialize(obj[prop], className);
                 }
+            } else {
+                //Else we can copy the object as it is, since we don't need to create a specific object instance.
+                result[properties[prop]] = obj[prop];
             }
         }
         return result as T;
@@ -203,6 +233,4 @@ export class Serializer {
         }
         return children[discriminatorValue];
     }
-
-
 }
