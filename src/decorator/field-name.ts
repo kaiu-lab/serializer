@@ -1,5 +1,4 @@
 import { METADATA_DESERIALIZE_FIELD_NAME } from './deserialize-field-name';
-import { METADATA_SERIALIZE_FIELD_NAME } from './serialize-field-name';
 
 export const METADATA_CUSTOM_FIELDS = 'serializer:field:properties';
 /**
@@ -26,6 +25,5 @@ export function FieldName(fieldName: string): (...args: any[]) => void {
         const customFieldNames = Reflect.getMetadata(METADATA_CUSTOM_FIELDS, target) || [];
         Reflect.defineMetadata(METADATA_CUSTOM_FIELDS, customFieldNames.concat([propertyKey]), target);
         Reflect.defineMetadata(METADATA_DESERIALIZE_FIELD_NAME, fieldName, target, propertyKey);
-        Reflect.defineMetadata(METADATA_SERIALIZE_FIELD_NAME, fieldName, target, propertyKey);
     };
 }
