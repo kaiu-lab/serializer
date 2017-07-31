@@ -1,5 +1,7 @@
 import 'reflect-metadata';
 import { ParentOptions } from './parent-options';
+
+export const METADATA_PARENT = 'serializer:parent';
 /**
  * Flags the given property as the discriminator.
  *
@@ -26,6 +28,6 @@ import { ParentOptions } from './parent-options';
  */
 export function Parent(options: ParentOptions): (...args: any[]) => void {
     return (target: any) => {
-        return Reflect.defineMetadata('serializer:parent', options, target);
+        return Reflect.defineMetadata(METADATA_PARENT, options, target);
     };
 }

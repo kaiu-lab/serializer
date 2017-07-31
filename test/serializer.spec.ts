@@ -2,7 +2,8 @@ import { Serializer } from '../src/serializer';
 import { expect } from 'chai';
 import { DeserializeAs } from '../src/decorator/deserialize-as';
 import { Parent } from '../src/decorator/parent';
-import { Deserialize } from '../src/decorator/deserialize';
+import { FieldName } from '../src/decorator/field-name';
+import { DeserializeFieldName } from '../src/decorator/deserialize-field-name';
 
 @Parent({
     discriminatorField: 'type'
@@ -67,23 +68,23 @@ class BazArray {
 }
 
 class DifferentFieldName {
-    @Deserialize('foo')
+    @FieldName('foo')
     bar: string;
 }
 
 class DifferentFieldNames {
-    @Deserialize('foo')
+    @FieldName('foo')
     bar: string;
 
-    @Deserialize('name')
+    @DeserializeFieldName('name')
     firstName: string;
 
-    @Deserialize('count')
+    @FieldName('count')
     length: number;
 }
 
 class NotOnlyDifferentFieldName {
-    @Deserialize('foo')
+    @FieldName('foo')
     bar: string;
 
     hey: string;
@@ -91,12 +92,12 @@ class NotOnlyDifferentFieldName {
 
 class DifferentFieldNameWithClass {
     @DeserializeAs(Bar)
-    @Deserialize('foo')
+    @FieldName('foo')
     bar: Bar;
 }
 
 class DifferentFieldNameArray {
-    @Deserialize('foo')
+    @FieldName('foo')
     bar: number[];
 }
 

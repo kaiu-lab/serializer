@@ -2,6 +2,10 @@ import 'reflect-metadata';
 import { Registration } from './registration';
 import { ParentOptions } from './decorator/parent-options';
 import { Instantiable } from './instantiable';
+import { METADATA_DESERIALIZE_AS } from './decorator/deserialize-as';
+import { METADATA_CUSTOM_FIELDS } from './decorator/field-name';
+import { METADATA_PARENT } from './decorator/parent';
+import { METADATA_DESERIALIZE_FIELD_NAME } from './decorator/deserialize-field-name';
 
 /**
  * The main class of the serializer, used to deserialize `Objects` into class instances in order to add
@@ -32,7 +36,7 @@ export class Serializer {
      * Gets the discriminator field for a given class.
      */
     private static getParentOptions(clazz: Instantiable): ParentOptions | undefined {
-        return Reflect.getMetadata('serializer:parent', clazz);
+        return Reflect.getMetadata(METADATA_PARENT, clazz);
     }
 
     /**
@@ -53,7 +57,7 @@ export class Serializer {
             }
         }
         //We get our metadata registry for custom properties
-        const customProperties = Reflect.getMetadata('serializer:field:properties', instance);
+        const customProperties = Reflect.getMetadata(METADATA_CUSTOM_FIELDS, instance);
         if (customProperties === undefined) {
             //If we don't have custom properties, going further is useless.
             return propsMap;
@@ -61,7 +65,7 @@ export class Serializer {
         //Using our custom properties
         for (const property of customProperties) {
             //We override current properties with the ones defined as custom.
-            propsMap[Reflect.getMetadata('serializer:field', instance, property)] = property;
+            propsMap[Reflect.getMetadata(METADATA_DESERIALIZE_FIELD_NAME, instance, property)] = property;
         }
         return propsMap;
     }
@@ -130,7 +134,7 @@ export class Serializer {
         //Then we copy every property of our object to our instance, using bindings.
         for (const prop in properties) {
             //We get our metadata for the class to deserialize.
-            const className: new() => any = Reflect.getMetadata('serializer:class', result, properties[prop]);
+            const className: new() => any = Reflect.getMetadata(METADATA_DESERIALIZE_AS, result, properties[prop]);
             //If we have some class-related metadata, we'll handle them.
             if (className !== undefined) {
                 if (obj[prop] instanceof Array) {
