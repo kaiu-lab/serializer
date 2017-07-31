@@ -84,7 +84,7 @@ class DifferentFieldNames {
 }
 
 class NotOnlyDifferentFieldName {
-    @FieldName('foo')
+    @DeserializeFieldName('foo')
     bar: string;
 
     hey: string;
