@@ -23,7 +23,7 @@ export const METADATA_DESERIALIZE_FIELD_NAME = 'serializer:deserialize:field';
 export function DeserializeFieldName(fieldName: string): (...args: any[]) => void {
     return (target: any, propertyKey: string) => {
         const customFieldNames = Reflect.getMetadata(METADATA_CUSTOM_FIELDS, target) || [];
-        Reflect.defineMetadata(METADATA_CUSTOM_FIELDS, customFieldNames.concat([propertyKey]), target);
+        Reflect.defineMetadata(METADATA_CUSTOM_FIELDS, [ ...customFieldNames, propertyKey], target);
         Reflect.defineMetadata(METADATA_DESERIALIZE_FIELD_NAME, fieldName, target, propertyKey);
     };
 }
