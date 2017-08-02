@@ -33,44 +33,6 @@ export class Serializer {
     private _registrations: Registration[] = [];
 
     /**
-     * Gets the discriminator field for a given class.
-     */
-    private static getParentOptions(clazz: Instantiable): ParentOptions | undefined {
-        return Reflect.getMetadata(METADATA_PARENT, clazz);
-    }
-
-    /**
-     * Returns the fields used to map data properties on result's ones.
-     *
-     * @param instance An instance of the class we're using.
-     * @param obj The current object we're deserializing.
-     * @returns A custom array containing obj's field as index and corresponding result's field as value.
-     */
-    private static getPropertyMap(obj: any, instance: any): { [index: string]: string } {
-        const propsMap: { [index: string]: string } = {};
-        //We create a first property map based on obj's properties.
-        for (const prop in obj) {
-            //Simple check to avoid iterations over strange things.
-            if (obj.hasOwnProperty(prop)) {
-                //The initial map will have identical keys and values.
-                propsMap[prop] = prop;
-            }
-        }
-        //We get our metadata registry for custom properties
-        const customProperties = Reflect.getMetadata(METADATA_CUSTOM_FIELDS, instance);
-        if (customProperties === undefined) {
-            //If we don't have custom properties, going further is useless.
-            return propsMap;
-        }
-        //Using our custom properties
-        for (const property of customProperties) {
-            //We override current properties with the ones defined as custom.
-            propsMap[Reflect.getMetadata(METADATA_DESERIALIZE_FIELD_NAME, instance, property)] = property;
-        }
-        return propsMap;
-    }
-
-    /**
      * Adds the given registrations to our current registration array.
      *
      * ## Example:
@@ -91,7 +53,7 @@ export class Serializer {
     public register(registration: Registration[]): void {
         for (const reg of registration) {
 
-            const parentOptions = Serializer.getParentOptions(reg.parent);
+            const parentOptions = this.getParentOptions(reg.parent);
 
             for (const value in reg.children) {
                 const child = reg.children[value];
@@ -130,7 +92,7 @@ export class Serializer {
         //First of all, we'll create an instance of our class
         const result: any = this.getInstance<T>(obj, clazz);
         //And we get the property binding map.
-        const properties = Serializer.getPropertyMap(obj, result);
+        const properties = this.getPropertyMap(obj, result);
         //Then we copy every property of our object to our instance, using bindings.
         for (const prop in properties) {
             //We get our metadata for the class to deserialize.
@@ -162,7 +124,7 @@ export class Serializer {
      * @returns An instance of the class we wanted.
      */
     private getInstance<T>(obj: any, clazz: Instantiable<T>): T {
-        const parentOptions = Serializer.getParentOptions(clazz);
+        const parentOptions = this.getParentOptions(clazz);
         // If we don't have metadata for inheritance, we can return the instance of the class we created.
         if (parentOptions === undefined) {
             return new clazz();
@@ -228,7 +190,7 @@ export class Serializer {
                     `with discriminator value ${obj[options.discriminatorField]}`);
             }
         }
-        const childOptions = Serializer.getParentOptions(children[discriminatorValue]);
+        const childOptions = this.getParentOptions(children[discriminatorValue]);
         // If the child used has children too.
         if (childOptions !== undefined
             && childOptions.discriminatorField !== undefined
@@ -236,5 +198,43 @@ export class Serializer {
             return this.getClass(children[discriminatorValue], obj, childOptions);
         }
         return children[discriminatorValue];
+    }
+
+    /**
+     * Gets the discriminator field for a given class.
+     */
+    private getParentOptions(clazz: Instantiable): ParentOptions | undefined {
+        return Reflect.getMetadata(METADATA_PARENT, clazz);
+    }
+
+    /**
+     * Returns the fields used to map data properties on result's ones.
+     *
+     * @param instance An instance of the class we're using.
+     * @param obj The current object we're deserializing.
+     * @returns A custom array containing obj's field as index and corresponding result's field as value.
+     */
+    private getPropertyMap(obj: any, instance: any): { [index: string]: string } {
+        const propsMap: { [index: string]: string } = {};
+        //We create a first property map based on obj's properties.
+        for (const prop in obj) {
+            //Simple check to avoid iterations over strange things.
+            if (obj.hasOwnProperty(prop)) {
+                //The initial map will have identical keys and values.
+                propsMap[prop] = prop;
+            }
+        }
+        //We get our metadata registry for custom properties
+        const customProperties = Reflect.getMetadata(METADATA_CUSTOM_FIELDS, instance);
+        if (customProperties === undefined) {
+            //If we don't have custom properties, going further is useless.
+            return propsMap;
+        }
+        //Using our custom properties
+        for (const property of customProperties) {
+            //We override current properties with the ones defined as custom.
+            propsMap[Reflect.getMetadata(METADATA_DESERIALIZE_FIELD_NAME, instance, property)] = property;
+        }
+        return propsMap;
     }
 }
