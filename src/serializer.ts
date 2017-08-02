@@ -84,7 +84,7 @@ export class Serializer {
      * @param clazz The class constructor.
      * @returns An instance of the type `T` with the prototype of `clazz` or one of its registered children.
      */
-    public deserialize<T>(obj: any, clazz?: any): T {
+    public deserialize<T>(obj: any, clazz?: any /* TODO See if we can change this any */): T {
         //if the class parameter is not specified, we can directly return the basic object.
         if (!clazz) {
             return obj;
@@ -95,24 +95,36 @@ export class Serializer {
         const properties = this.getPropertyMap(obj, result);
         //Then we copy every property of our object to our instance, using bindings.
         for (const prop in properties) {
+            const property = properties[prop];
             //We get our metadata for the class to deserialize.
-            const className: new() => any = Reflect.getMetadata(METADATA_DESERIALIZE_AS, result, properties[prop]);
+            const propClazz: Instantiable = Reflect.getMetadata(METADATA_DESERIALIZE_AS, result, property);
             //If we have some class-related metadata, we'll handle them.
-            if (className !== undefined) {
+            if (propClazz !== undefined) {
                 if (obj[prop] instanceof Array) {
-                    result[properties[prop]] = [];
-                    for (const item of obj[prop]) {
-                        result[properties[prop]].push(this.deserialize(item, className));
-                    }
+                    result[property] = this.deserializeArray(obj[prop], propClazz);
                 } else {
-                    result[properties[prop]] = this.deserialize(obj[prop], className);
+                    result[property] = this.deserialize(obj[prop], propClazz);
                 }
             } else {
                 //Else we can copy the object as it is, since we don't need to create a specific object instance.
-                result[properties[prop]] = obj[prop];
+                result[property] = obj[prop];
             }
         }
         return result as T;
+    }
+
+    /**
+     * Adds a class to a given array of basic objects.
+     * @param array The array of objects.
+     * @param clazz The class constructor.
+     * @returns An array of instances of the type `T` with the prototype of `clazz`.
+     */
+    private deserializeArray<T>(array: Array<any>, clazz: Instantiable<T>): T[] {
+        const results = [];
+        for (const item of array) {
+            results.push(this.deserialize<T>(item, clazz));
+        }
+        return results;
     }
 
     /**
