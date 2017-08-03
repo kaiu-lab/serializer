@@ -89,6 +89,10 @@ export class Serializer {
         if (!clazz) {
             return obj;
         }
+        //If the object is an array, we have to handle it as an array.
+        if (obj instanceof Array) {
+            return this.deserializeArray(obj, clazz) as T;
+        }
         //First of all, we'll create an instance of our class
         const result: any = this.getInstance<T>(obj, clazz);
         //And we get the property binding map.
@@ -100,11 +104,7 @@ export class Serializer {
             const propClazz: Instantiable = Reflect.getMetadata(METADATA_DESERIALIZE_AS, result, property);
             //If we have some class-related metadata, we'll handle them.
             if (propClazz !== undefined) {
-                if (obj[prop] instanceof Array) {
-                    result[property] = this.deserializeArray(obj[prop], propClazz);
-                } else {
-                    result[property] = this.deserialize(obj[prop], propClazz);
-                }
+                result[property] = this.deserialize(obj[prop], propClazz);
             } else {
                 //Else we can copy the object as it is, since we don't need to create a specific object instance.
                 result[property] = obj[prop];
@@ -119,7 +119,7 @@ export class Serializer {
      * @param clazz The class constructor.
      * @returns An array of instances of the type `T` with the prototype of `clazz`.
      */
-    private deserializeArray<T>(array: Array<any>, clazz: Instantiable<T>): T[] {
+    private deserializeArray<T>(array: Array<any>, clazz: Instantiable<T>): any {
         const results = [];
         for (const item of array) {
             results.push(this.deserialize<T>(item, clazz));
