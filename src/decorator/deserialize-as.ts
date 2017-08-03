@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { Instantiable } from '../instantiable';
 
+export const METADATA_DESERIALIZE_AS = 'serializer:class';
 /**
  * Tags a property to be deserialized as a given class.
  *
@@ -16,6 +17,6 @@ import { Instantiable } from '../instantiable';
  */
 export function DeserializeAs(clazz: Instantiable): (...args: any[]) => void {
     return (target: any, propertyKey: string) => {
-        return Reflect.defineMetadata('serializer:class', clazz, target, propertyKey);
+        return Reflect.defineMetadata(METADATA_DESERIALIZE_AS, clazz, target, propertyKey);
     };
 }

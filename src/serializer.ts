@@ -2,6 +2,10 @@ import 'reflect-metadata';
 import { Registration } from './registration';
 import { ParentOptions } from './decorator/parent-options';
 import { Instantiable } from './instantiable';
+import { METADATA_DESERIALIZE_AS } from './decorator/deserialize-as';
+import { METADATA_CUSTOM_FIELDS } from './decorator/field-name';
+import { METADATA_PARENT } from './decorator/parent';
+import { METADATA_DESERIALIZE_FIELD_NAME } from './decorator/deserialize-field-name';
 
 /**
  * The main class of the serializer, used to deserialize `Objects` into class instances in order to add
@@ -29,13 +33,6 @@ export class Serializer {
     private _registrations: Registration[] = [];
 
     /**
-     * Gets the discriminator field for a given class.
-     */
-    private static getParentOptions(clazz: Instantiable): ParentOptions | undefined {
-        return Reflect.getMetadata('serializer:parent', clazz);
-    }
-
-    /**
      * Adds the given registrations to our current registration array.
      *
      * ## Example:
@@ -56,7 +53,7 @@ export class Serializer {
     public register(registration: Registration[]): void {
         for (const reg of registration) {
 
-            const parentOptions = Serializer.getParentOptions(reg.parent);
+            const parentOptions = this.getParentOptions(reg.parent);
 
             for (const value in reg.children) {
                 const child = reg.children[value];
@@ -87,36 +84,47 @@ export class Serializer {
      * @param clazz The class constructor.
      * @returns An instance of the type `T` with the prototype of `clazz` or one of its registered children.
      */
-    public deserialize<T>(obj: any, clazz?: any): T {
+    public deserialize<T>(obj: any, clazz?: any /* TODO See if we can change this any */): T {
         //if the class parameter is not specified, we can directly return the basic object.
         if (!clazz) {
             return obj;
         }
         //First of all, we'll create an instance of our class
         const result: any = this.getInstance<T>(obj, clazz);
-        //Then we copy every property of our object to our clazz
-        for (const prop in obj) {
-            //Simple check to avoid iterations over strange things.
-            if (obj.hasOwnProperty(prop)) {
-                //We get our metadata for the class to deserialize
-                const metadata: new() => any = Reflect.getMetadata('serializer:class', result, prop);
-                //If we have some metadata, we'll handle them
-                if (metadata !== undefined) {
-                    if (obj[prop] instanceof Array) {
-                        result[prop] = [];
-                        for (const item of obj[prop]) {
-                            result[prop].push(this.deserialize(item, metadata));
-                        }
-                    } else {
-                        result[prop] = this.deserialize(obj[prop], metadata);
-                    }
+        //And we get the property binding map.
+        const properties = this.getPropertyMap(obj, result);
+        //Then we copy every property of our object to our instance, using bindings.
+        for (const prop in properties) {
+            const property = properties[prop];
+            //We get our metadata for the class to deserialize.
+            const propClazz: Instantiable = Reflect.getMetadata(METADATA_DESERIALIZE_AS, result, property);
+            //If we have some class-related metadata, we'll handle them.
+            if (propClazz !== undefined) {
+                if (obj[prop] instanceof Array) {
+                    result[property] = this.deserializeArray(obj[prop], propClazz);
                 } else {
-                    //Else we can copy the object as it is, since we don't need to create a specific object instance.
-                    result[prop] = obj[prop];
+                    result[property] = this.deserialize(obj[prop], propClazz);
                 }
+            } else {
+                //Else we can copy the object as it is, since we don't need to create a specific object instance.
+                result[property] = obj[prop];
             }
         }
         return result as T;
+    }
+
+    /**
+     * Adds a class to a given array of basic objects.
+     * @param array The array of objects.
+     * @param clazz The class constructor.
+     * @returns An array of instances of the type `T` with the prototype of `clazz`.
+     */
+    private deserializeArray<T>(array: Array<any>, clazz: Instantiable<T>): T[] {
+        const results = [];
+        for (const item of array) {
+            results.push(this.deserialize<T>(item, clazz));
+        }
+        return results;
     }
 
     /**
@@ -128,7 +136,7 @@ export class Serializer {
      * @returns An instance of the class we wanted.
      */
     private getInstance<T>(obj: any, clazz: Instantiable<T>): T {
-        const parentOptions = Serializer.getParentOptions(clazz);
+        const parentOptions = this.getParentOptions(clazz);
         // If we don't have metadata for inheritance, we can return the instance of the class we created.
         if (parentOptions === undefined) {
             return new clazz();
@@ -194,7 +202,7 @@ export class Serializer {
                     `with discriminator value ${obj[options.discriminatorField]}`);
             }
         }
-        const childOptions = Serializer.getParentOptions(children[discriminatorValue]);
+        const childOptions = this.getParentOptions(children[discriminatorValue]);
         // If the child used has children too.
         if (childOptions !== undefined
             && childOptions.discriminatorField !== undefined
@@ -204,5 +212,41 @@ export class Serializer {
         return children[discriminatorValue];
     }
 
+    /**
+     * Gets the discriminator field for a given class.
+     */
+    private getParentOptions(clazz: Instantiable): ParentOptions | undefined {
+        return Reflect.getMetadata(METADATA_PARENT, clazz);
+    }
 
+    /**
+     * Returns the fields used to map data properties on result's ones.
+     *
+     * @param instance An instance of the class we're using.
+     * @param obj The current object we're deserializing.
+     * @returns A custom array containing obj's field as index and corresponding result's field as value.
+     */
+    private getPropertyMap(obj: any, instance: any): { [index: string]: string } {
+        const propsMap: { [index: string]: string } = {};
+        //We create a first property map based on obj's properties.
+        for (const prop in obj) {
+            //Simple check to avoid iterations over strange things.
+            if (obj.hasOwnProperty(prop)) {
+                //The initial map will have identical keys and values.
+                propsMap[prop] = prop;
+            }
+        }
+        //We get our metadata registry for custom properties
+        const customProperties = Reflect.getMetadata(METADATA_CUSTOM_FIELDS, instance);
+        if (customProperties === undefined) {
+            //If we don't have custom properties, going further is useless.
+            return propsMap;
+        }
+        //Using our custom properties
+        for (const property of customProperties) {
+            //We override current properties with the ones defined as custom.
+            propsMap[Reflect.getMetadata(METADATA_DESERIALIZE_FIELD_NAME, instance, property)] = property;
+        }
+        return propsMap;
+    }
 }
