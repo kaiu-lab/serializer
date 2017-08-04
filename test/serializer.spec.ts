@@ -216,8 +216,28 @@ describe('Serializer service', () => {
                 'attrNumber': 5,
                 'attrBoolean': true
             }, Foo);
-            expect(typeof(res)).to.eql(typeof(new Foo()));
+            expect(res).to.be.instanceof(Foo);
             expect(res.getMe()).to.eql('val - 5');
+        }));
+
+        it('Should deserialize array of class instances', (() => {
+            const res = serializer.deserialize<Foo[]>([
+                {
+                    'attrString' : 'val',
+                    'attrNumber' : 5,
+                    'attrBoolean': true,
+                }, {
+                    'attrString' : 'foo',
+                    'attrNumber' : 10
+                },
+            ], Foo);
+            expect(res).to.be.an('array').of.length(2);
+
+            expect(res[0]).to.be.instanceof(Foo);
+            expect(res[0].getMe()).to.eql('val - 5');
+
+            expect(res[1]).to.be.instanceof(Foo);
+            expect(res[1].getMe()).to.eql('foo - 10');
         }));
     });
 
