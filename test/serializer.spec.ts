@@ -165,7 +165,7 @@ describe('Serializer service', () => {
 
     describe('Inheritance tests', () => {
         it('Should use discriminant field to find correct child', (() => {
-            serializer.register([
+            serializer.registry.add([
                 {
                     parent: AbstractParentExample,
                     children: {
@@ -177,7 +177,7 @@ describe('Serializer service', () => {
         }));
 
         it('Should handle child of child', (() => {
-            serializer.register([
+            serializer.registry.add([
                 {
                     parent: AbstractParentExample,
                     children: {
@@ -198,7 +198,7 @@ describe('Serializer service', () => {
         }));
 
         it('Should throw an error if no children are found with given discriminator', () => {
-            serializer.register([
+            serializer.registry.add([
                 {
                     parent: AbstractParentExample,
                     children: {
@@ -211,7 +211,7 @@ describe('Serializer service', () => {
         });
 
         it('Should throw an error if the children does not extends the parent', () => {
-            expect(() => serializer.register([
+            expect(() => serializer.registry.add([
                 {
                     parent: AbstractParentExample,
                     children: {
@@ -222,7 +222,7 @@ describe('Serializer service', () => {
         });
 
         it('Should throw an error if the parent is registered among the children without allowing itself', () => {
-            expect(() => serializer.register([
+            expect(() => serializer.registry.add([
                 {
                     parent: ParentExample,
                     children: {
@@ -233,7 +233,7 @@ describe('Serializer service', () => {
         });
 
         it('Should handle a null or undefined discriminator value if the parent allows itself', () => {
-            serializer.register([
+            serializer.registry.add([
                     {
                         parent: Child,
                         children: {
@@ -249,7 +249,7 @@ describe('Serializer service', () => {
         });
 
         it('Should handle the parent discriminator value if it allows itself', () => {
-            serializer.register([
+            serializer.registry.add([
                     {
                         parent: Child,
                         children: {
@@ -275,7 +275,7 @@ describe('Serializer service', () => {
         });
 
         it('Should throw an error if the discriminator is null or undefined and the parent does not allow itself', () => {
-            serializer.register([
+            serializer.registry.add([
                     {
                         parent: AbstractParentExample,
                         children: {
@@ -298,7 +298,7 @@ describe('Serializer service', () => {
 
     describe('Override registration tests', () => {
         it('Should allow multiple registration of the same class under multiple discriminator value', () => {
-            serializer.register([
+            serializer.registry.add([
                     {
                         parent: Child,
                         children: {
@@ -314,7 +314,7 @@ describe('Serializer service', () => {
         });
 
         it('Should allow to override a discriminator value with an other class', () => {
-            serializer.register([
+            serializer.registry.add([
                     {
                         parent: Child,
                         children: {
@@ -332,7 +332,7 @@ describe('Serializer service', () => {
 
             expect(serializer.deserialize<Child>({child: 'grandchild'}, Child).test()).to.eql('OTHER GRAND CHILD');
 
-            serializer.register([
+            serializer.registry.add([
                     {
                         parent: Child,
                         children: {
