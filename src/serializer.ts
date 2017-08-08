@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Class } from './class';
+import { Class, Instantiable } from './class';
 import { METADATA_DESERIALIZE_AS } from './decorator/deserialize-as';
 import { METADATA_DESERIALIZE_FIELD_NAME } from './decorator/deserialize-field-name';
 import { METADATA_CUSTOM_FIELDS } from './decorator/field-name';
@@ -80,8 +80,15 @@ export class Serializer {
      * @return an instance of the class `T`.
      */
     private deserializeObject<T>(obj: any, clazz: Class<T>): T {
-        //First of all, we'll create an instance of our class
-        const result: any = this.registry.getInstance<T>(obj, clazz);
+        //First of all, we'll find if the registry knows any subclass
+        let instantiable: Instantiable = this.registry.findClass(clazz, obj);
+        if (instantiable === undefined) {
+            //The registry doesn't know it, so we keep the original class
+            instantiable = clazz as Instantiable;
+        }
+
+        const result = new instantiable();
+
         //And we get the property binding map.
         const properties = this.getPropertyMap(obj, result);
         //Then we copy every property of our object to our instance, using bindings.

@@ -1,7 +1,7 @@
-import { Registration } from './registration';
 import { Class, Instantiable } from './class';
-import { ParentOptions } from './decorator/parent-options';
 import { METADATA_PARENT } from './decorator/parent';
+import { ParentOptions } from './decorator/parent-options';
+import { Registration } from './registration';
 
 export class Registry {
 
@@ -9,34 +9,6 @@ export class Registry {
      * Our current registrations for inheritance handling.
      */
     private _registrations: Registration[] = [];
-
-    /**
-     * Creates an instance of a given class using the base object to find which class we need,
-     * The base object will be used to get a possible discriminator value to be able to handle inheritance.
-     *
-     * @param obj The object we need a class for.
-     * @param clazz The base class of the object, can be an abstract class.
-     * @returns An instance of the class we wanted.
-     */
-    public getInstance<T>(obj: any, clazz: Class<T>): T {
-        const parentOptions = this.getParentOptions(clazz);
-        // If we don't have metadata for inheritance, we can return the instance of the class we created.
-        if (parentOptions === undefined) {
-            return new (clazz as Instantiable<T>)();
-        }
-        const discriminatorValue = obj[parentOptions.discriminatorField];
-        // In case of missing discriminator value...
-        if (discriminatorValue === undefined || discriminatorValue === null) {
-            // ...check if the parent allows itself and no explicit discriminators are defined.
-            if (!parentOptions.allowSelf && !this.parentHasExplicitDiscriminator(clazz)) {
-                throw new TypeError(`Missing attribute type to discriminate the subclass of ${clazz.name}`);
-            }
-
-            return new (clazz as Instantiable<T>)();
-        }
-        const resultInstantiable = this.getInstantiable(clazz, obj, parentOptions);
-        return new resultInstantiable();
-    }
 
     /**
      * Adds the given registrations to our current registration array.
@@ -80,6 +52,31 @@ export class Registry {
         this._registrations = this._registrations.concat(registration);
     }
 
+    /**
+     * Use the class `Parent` metadata in combination with the registrations to find
+     * the correct class for the given object.
+     * @returns the class of the given object, or undefined if the registry doesn't know it.
+     */
+    public findClass<T, V extends T>(clazz: Class<T>, obj: any): Instantiable<V> | undefined {
+        const parentOptions = this.getParentOptions(clazz);
+        // If we don't have metadata for inheritance, it doesn't concern the registry.
+        if (parentOptions === undefined) {
+            return undefined;
+        }
+
+        const discriminatorValue = obj[parentOptions.discriminatorField];
+        // In case of missing discriminator value...
+        if (discriminatorValue === undefined || discriminatorValue === null) {
+            // ...check if the parent allows itself and no explicit discriminators are defined.
+            if (!parentOptions.allowSelf && !this.parentHasExplicitDiscriminator(clazz)) {
+                throw new TypeError(`Missing attribute type to discriminate the subclass of ${clazz.name}`);
+            }
+
+            return clazz as Instantiable;
+        }
+
+        return this.getInstantiable(clazz, obj, parentOptions);
+    }
 
     /**
      * Gets the discriminator field for a given class.
