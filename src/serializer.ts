@@ -1,11 +1,11 @@
 import 'reflect-metadata';
-import { Registration } from './registration';
-import { ParentOptions } from './decorator/parent-options';
 import { Class, Instantiable } from './class';
 import { METADATA_DESERIALIZE_AS } from './decorator/deserialize-as';
+import { METADATA_DESERIALIZE_FIELD_NAME } from './decorator/deserialize-field-name';
 import { METADATA_CUSTOM_FIELDS } from './decorator/field-name';
 import { METADATA_PARENT } from './decorator/parent';
-import { METADATA_DESERIALIZE_FIELD_NAME } from './decorator/deserialize-field-name';
+import { ParentOptions } from './decorator/parent-options';
+import { Registration } from './registration';
 
 /**
  * The main class of the serializer, used to deserialize `Objects` into class instances in order to add
@@ -75,51 +75,86 @@ export class Serializer {
     }
 
     /**
-     * Adds a class to a given basic object, adding the whole prototype of the class to the basic object.
+     * Deserialize an object into a specified class.
+     *
+     * @return an instance of the class `T`.
+     */
+    public deserialize<T>(obj: any, clazz: Class<T>): T;
+
+    /**
+     * Deserialize an array of objects into an array of specified classes.
+     *
+     * @return an array of instances of the class `T`.
+     */
+    public deserialize<T>(array: any[], clazz: [Class<T>]): T[];
+
+    /**
+     * Deserialize an object or an array of objects into instances of specified class,
+     * adding the whole prototype of the class to the basic objects.
+     *
+     * For an array of objects, the type specified should be an array of the class.
      * ## Example
      * ```typescript
-     * serializer.deserialize<Bar>({ prop: 'foo' }, Bar);
+     * serializer.deserialize({ prop: 'bar' }, Foo); // -> Foo
+     * serializer.deserialize([{ prop: 'bar' }, {prop: 'baz'}], [Foo]); // -> [Foo, Foo]
      * ```
-     * @param obj The object, usually coming from a simple `JSON.parse`
-     * @param clazz The class constructor.
-     * @returns An instance of the type `T` with the prototype of `clazz` or one of its registered children.
+     *
+     * @returns an instance (or an array of instances) of the class `T`.
      */
-    public deserialize<T>(obj: any, clazz?: Class<T>): T {
-        //if the class parameter is not specified, we can directly return the basic object.
-        if (!clazz) {
-            return obj;
-        }
+    public deserialize<T>(obj: any, clazz: Class<T> | [Class<T>]): T | T[] {
+
         //If the object is an array, we have to handle it as an array.
-        if (obj instanceof Array) {
-            return this.deserializeArray(obj, clazz) as T;
+        if (clazz instanceof Array) {
+            //Check the consistency bewteen the type of deserialization and the type of the given object.
+            if (!(obj instanceof Array)) {
+                const itemClazz = clazz[0];
+                throw new TypeError(`Deserializing an array of ${itemClazz.name} can only work with an array of objects.`);
+            }
+
+            return this.deserializeArray<T>(obj, clazz[0]);
         }
+
+        //Check the consistency bewteen the type of deserialization and the type of the given object.
+        if (obj instanceof Array) {
+            throw new TypeError(`Deserializing an instance of ${clazz.name} can only work with an object, but array given.`);
+        }
+        return this.deserializeObject<T>(obj, clazz);
+    }
+
+    /**
+     * Deserialize an object into a specified class.
+     * @param obj The object.
+     * @param clazz The class constructor.
+     * @return an instance of the class `T`.
+     */
+    private deserializeObject<T>(obj: any, clazz: Class<T>): T {
         //First of all, we'll create an instance of our class
         const result: any = this.getInstance<T>(obj, clazz);
         //And we get the property binding map.
         const properties = this.getPropertyMap(obj, result);
         //Then we copy every property of our object to our instance, using bindings.
-        for (const prop in properties) {
-            const property = properties[prop];
+        for (const originalPropertyName in properties) {
+            const targetPropertyName = properties[originalPropertyName];
             //We get our metadata for the class to deserialize.
-            const propClazz: Class = Reflect.getMetadata(METADATA_DESERIALIZE_AS, result, property);
+            const propClazz: Class = Reflect.getMetadata(METADATA_DESERIALIZE_AS, result, targetPropertyName);
             //If we have some class-related metadata, we'll handle them.
             if (propClazz !== undefined) {
-                result[property] = this.deserialize(obj[prop], propClazz);
+                result[targetPropertyName] = this.deserialize(obj[originalPropertyName], propClazz);
             } else {
                 //Else we can copy the object as it is, since we don't need to create a specific object instance.
-                result[property] = obj[prop];
+                result[targetPropertyName] = obj[originalPropertyName];
             }
         }
         return result as T;
     }
 
     /**
-     * Adds a class to a given array of basic objects.
+     * Deserialize an array of objects into an array of specified classes.
      * @param array The array of objects.
      * @param clazz The class constructor.
-     * @returns An array of instances of the type `T` with the prototype of `clazz`.
+     * @returns An array of instances of the type `T`.
      */
-    private deserializeArray<T>(array: Array<any>, clazz: Class<T>): any {
+    private deserializeArray<T>(array: any[], clazz: Class<T>): T[] {
         const results = [];
         for (const item of array) {
             results.push(this.deserialize<T>(item, clazz));
