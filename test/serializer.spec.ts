@@ -198,13 +198,5 @@ describe('Serializer service', () => {
             mockRegistry.verify();
         }));
 
-        it('Should use the current class if the registry does not know it', (() => {
-            mockRegistry.expects('findClass').once().returns(undefined);
-            expect(serializer.deserialize({}, Bar)).to.be.instanceOf(Bar);
-
-            mockRegistry.restore();
-            mockRegistry.verify();
-        }));
-
     });
 });

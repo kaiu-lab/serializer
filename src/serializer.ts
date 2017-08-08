@@ -81,11 +81,7 @@ export class Serializer {
      */
     private deserializeObject<T>(obj: any, clazz: Class<T>): T {
         //First of all, we'll find if the registry knows any subclass
-        let instantiable: Instantiable = this.registry.findClass(clazz, obj);
-        if (instantiable === undefined) {
-            //The registry doesn't know it, so we keep the original class
-            instantiable = clazz as Instantiable;
-        }
+        const instantiable: Instantiable = this.registry.findClass(clazz, obj);
 
         const result = new instantiable();
 

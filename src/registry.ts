@@ -1,14 +1,14 @@
 import { Class, Instantiable } from './class';
 import { METADATA_PARENT } from './decorator/parent';
 import { ParentOptions } from './decorator/parent-options';
-import { Registration } from './registration';
+import { ProcessedRegistration, Registration } from './registration';
 
 export class Registry {
 
     /**
      * Our current registrations for inheritance handling.
      */
-    private _registrations: Registration[] = [];
+    private _registrations = new Map<Class, ProcessedRegistration>();
 
     /**
      * Adds the given registrations to our current registration array.
@@ -30,8 +30,13 @@ export class Registry {
      */
     public add(registration: Registration[]): void {
         for (const reg of registration) {
+            const parentOptions: ParentOptions = Reflect.getMetadata(METADATA_PARENT, reg.parent);
 
-            const parentOptions = this.getParentOptions(reg.parent);
+            if (parentOptions === undefined) {
+                throw new TypeError(`Class ${reg.parent.name} needs a @Parent decorator to be registered`);
+            }
+
+            let parentHasExplicitDiscriminator = false;
 
             for (const value in reg.children) {
                 const child = reg.children[value];
@@ -41,6 +46,8 @@ export class Registry {
                     if (!parentOptions.allowSelf) {
                         throw new TypeError(`Class ${reg.parent.name} cannot be registered among its children`);
                     }
+
+                    parentHasExplicitDiscriminator = true;
                 } else {
                     //Check if the child extends the parent
                     if (!(child.prototype instanceof reg.parent)) {
@@ -48,98 +55,63 @@ export class Registry {
                     }
                 }
             }
+
+            this._registrations.set(reg.parent, {...reg, parentOptions, parentHasExplicitDiscriminator});
         }
-        this._registrations = this._registrations.concat(registration);
     }
 
     /**
      * Use the class `Parent` metadata in combination with the registrations to find
      * the correct class for the given object.
-     * @returns the class of the given object, or undefined if the registry doesn't know it.
+     * @returns the class of the given object.
      */
-    public findClass<T, V extends T>(clazz: Class<T>, obj: any): Instantiable<V> | undefined {
-        const parentOptions = this.getParentOptions(clazz);
+    public findClass<T, V extends T>(clazz: Class<T>, obj: any): Instantiable<V> {
+        const registration = this._registrations.get(clazz);
+
         // If we don't have metadata for inheritance, it doesn't concern the registry.
-        if (parentOptions === undefined) {
-            return undefined;
+        if (registration === undefined) {
+            return clazz as Instantiable;
         }
 
-        const discriminatorValue = obj[parentOptions.discriminatorField];
+        const discriminatorValue = obj[registration.parentOptions.discriminatorField];
         // In case of missing discriminator value...
         if (discriminatorValue === undefined || discriminatorValue === null) {
             // ...check if the parent allows itself and no explicit discriminators are defined.
-            if (!parentOptions.allowSelf && !this.parentHasExplicitDiscriminator(clazz)) {
+            if (!registration.parentOptions.allowSelf && !registration.parentHasExplicitDiscriminator) {
                 throw new TypeError(`Missing attribute type to discriminate the subclass of ${clazz.name}`);
             }
 
             return clazz as Instantiable;
         }
 
-        return this.getInstantiable(clazz, obj, parentOptions);
-    }
-
-    /**
-     * Gets the discriminator field for a given class.
-     */
-    private getParentOptions(clazz: Class): ParentOptions | undefined {
-        return Reflect.getMetadata(METADATA_PARENT, clazz);
+        return this.getInstantiable(registration, obj);
     }
 
     /**
      * Used to get the class from our registrations using the parent class and the current discriminator value.
      *
-     * @param parent The parent class of our current class.
-     * @param obj The javascript object with data inside.
-     * @param options The Options used to configure the parent class.
-     * @returns The constructor of the class we're looking for, or the parent constructor if none is found.
+     * @returns the class we're looking for, or the parent if none is found.
      */
-    private getInstantiable(parent: Class, obj: any, options: ParentOptions): Instantiable {
-        const discriminatorValue: string = obj[options.discriminatorField];
-        let children: { [index: string]: Class } = {};
-        for (const entry of this._registrations) {
-            // If the parent of this entry is the one we're looking for.
-            // This allows to declare a map for the same parent in different modules.
-            if (entry.parent === parent) {
-                // We add these children to our children array.
-                children = {...children, ...entry.children};
+    private getInstantiable(registration: ProcessedRegistration, obj: any): Instantiable {
+
+        const discriminatorField = registration.parentOptions.discriminatorField;
+        const discriminatorValue: string = obj[discriminatorField];
+        if (typeof discriminatorValue !== 'string' && typeof discriminatorValue !== 'number') {
+            throw new TypeError(`Field ${discriminatorField} used for ${registration.parent} \
+discrimination should be a string, ${discriminatorValue} given.`);
+        }
+
+        const child = registration.children[discriminatorValue];
+        if (child === undefined || child === registration.parent) {
+            if (!registration.parentOptions.allowSelf) {
+                throw new TypeError(`No matching subclass for parent class ${registration.parent.name} \
+with discriminator value ${obj[discriminatorField]}.` );
             }
+
+            return registration.parent as Instantiable;
         }
-        if (children[discriminatorValue] === undefined) {
-            if (options.allowSelf) {
-                return parent as Instantiable;
-            } else {
-                throw new TypeError(`No matching subclass for parent class ${parent.name} ` +
-                    `with discriminator value ${obj[options.discriminatorField]}`);
-            }
-        }
-        const childOptions = this.getParentOptions(children[discriminatorValue]);
-        // If the child used has children too.
-        if (childOptions !== undefined
-            && childOptions.discriminatorField !== undefined
-            && childOptions.discriminatorField !== options.discriminatorField) {
-            return this.getInstantiable(children[discriminatorValue], obj, childOptions);
-        }
-        return children[discriminatorValue] as Instantiable;
+
+        return this.findClass(child, obj);
     }
 
-
-    /**
-     * Check if the given parent class has explicitly defined its discriminator value.
-     */
-    private parentHasExplicitDiscriminator(clazz: Class): boolean {
-        for (const reg of this._registrations) {
-            // Ignore registrations that does not concern this parent.
-            if (reg.parent !== clazz) {
-                continue;
-            }
-
-            for (const value in reg.children) {
-                if (reg.children[value] === clazz) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
 }

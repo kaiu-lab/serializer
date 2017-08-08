@@ -90,6 +90,15 @@ describe('Registry service', () => {
                 .to.throw(TypeError, 'No matching subclass for parent class AbstractFirstLevel with discriminator value fail');
         });
 
+        it('Should throw an error if the registered parent does not have a Parent decorator', () => {
+            expect(() => registry.add([
+                {
+                    parent: ThirdLevelA,
+                    children: {},
+                },
+            ])).to.throw(TypeError, 'Class ThirdLevelA needs a @Parent decorator to be registered');
+        });
+
         it('Should throw an error if the children does not extends the parent', () => {
             expect(() => registry.add([
                 {
@@ -141,6 +150,13 @@ describe('Registry service', () => {
         });
 
         it('Should throw if the parent discriminator is explicitly defined and the discriminator value is missing', () => {
+            registry.add([
+                {
+                    parent: AbstractFirstLevel,
+                    children: {},
+                },
+            ]);
+
             const expectedError = 'Missing attribute type to discriminate the subclass of AbstractFirstLevel';
 
             expect(() => expect(registry.findClass(AbstractFirstLevel, {type: null})))
@@ -220,6 +236,36 @@ describe('Registry service', () => {
             );
 
             expect(registry.findClass(SecondLevelB, {typeB: 'child'})).to.equal(ThirdLevelB1);
+        });
+
+        it('Should merge registrations of the same parent', () => {
+            registry.add([
+                    {
+                        parent: SecondLevelB,
+                        children: {
+                            'child1': ThirdLevelB1,
+                            'childX': ThirdLevelB1,
+                        },
+                    }]);
+
+            expect(registry.findClass(SecondLevelB, {typeB: 'child1'})).to.equal(ThirdLevelB1);
+            expect(registry.findClass(SecondLevelB, {typeB: 'childX'})).to.equal(ThirdLevelB1);
+
+            registry.add([
+                    {
+                        parent: SecondLevelB,
+                        children: {
+                            'child2': ThirdLevelB2,
+                            'childX': ThirdLevelB2,
+                        },
+                    },
+                ],
+            );
+
+            expect(registry.findClass(SecondLevelB, {typeB: 'child1'})).to.equal(ThirdLevelB1);
+            expect(registry.findClass(SecondLevelB, {typeB: 'child2'})).to.equal(ThirdLevelB2);
+            expect(registry.findClass(SecondLevelB, {typeB: 'childX'})).to.equal(ThirdLevelB2);
+
         });
     });
 

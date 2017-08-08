@@ -1,5 +1,5 @@
 export * from './decorator';
 export * from './class';
-export * from './registration';
+export { Registration } from './registration';
 export * from './registry';
 export * from './serializer';
