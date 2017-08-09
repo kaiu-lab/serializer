@@ -1,9 +1,5 @@
-import { Serializer } from '../src/serializer';
 import { expect } from 'chai';
-import { DeserializeAs } from '../src/decorator/deserialize-as';
-import { Parent } from '../src/decorator/parent';
-import { FieldName } from '../src/decorator/field-name';
-import { DeserializeFieldName } from '../src/decorator/deserialize-field-name';
+import { DeserializeAs, DeserializeFieldName, FieldName, Parent, Serializer } from '../src';
 
 @Parent({
     discriminatorField: 'type'
@@ -63,7 +59,7 @@ class Baz {
 }
 
 class BazArray {
-    @DeserializeAs(Bar)
+    @DeserializeAs([Bar])
     bars: Bar[];
 }
 
@@ -114,102 +110,6 @@ describe('Serializer service', () => {
 
     describe('Basic deserialization tests', () => {
 
-        it('Should deserialize array of strings', (() => {
-            expect(serializer.deserialize<any>(['val1', 'val2'])).to.eql(['val1', 'val2']);
-        }));
-
-        it('Should deserialize array of numbers', (() => {
-            expect(serializer.deserialize<any>([1, 2])).to.eql([1, 2]);
-        }));
-
-        it('Should deserialize array of nulls', (() => {
-            expect(serializer.deserialize<any>([null, null])).to.eql([null, null]);
-        }));
-
-        it('Should deserialize array of booleans', (() => {
-            expect(serializer.deserialize<any>([true, false])).to.eql([true, false]);
-        }));
-
-        it('Should deserialize array of arrays', (() => {
-            expect(serializer.deserialize<any>([['val1', 'val2'], [5, 6]]))
-                .to.eql([['val1', 'val2'], [5, 6]]);
-        }));
-
-        it('Should deserialize array of arrays', (() => {
-            expect(serializer.deserialize<any>(['val', 5, null, true, ['val1', 'val2']]))
-                .to.eql(['val', 5, null, true, ['val1', 'val2']]);
-        }));
-
-        it('Should deserialize standard object', (() => {
-            expect(serializer.deserialize<any>({
-                'attr_string': 'val',
-                'attr_number': 5,
-                'attr_boolean': true,
-                'attr_null': null,
-                'attr_array': ['val1', 5, null, [true, false]]
-            }))
-                .to.eql({
-                    attr_string: 'val',
-                    attr_number: 5,
-                    attr_boolean: true,
-                    attr_null: null,
-                    attr_array: ['val1', 5, null, [true, false]]
-                }
-            );
-        }));
-
-        it('Should deserialize array of standard objects', (() => {
-            expect(serializer.deserialize<any>(
-                [
-                    {
-                        'attr_string': 'val1',
-                        'attr_number': 1,
-                        'attr_boolean': true,
-                        'attr_array': ['val1', 5, null, [true, false]]
-                    },
-                    {
-                        'attr_string': 'val2',
-                        'attr_number': 2,
-                        'attr_boolean': false,
-                        'attr_null': null,
-                        'attr_object': {'foo': ['bar', 'baz']}
-                    },
-                    {
-                        'attr_string': 'val3',
-                        'attr_objects': [
-                            {'foo': 'bar'},
-                            {'john': 'snow'},
-                            {'no-idea': [1, 2]}
-                        ]
-                    }
-                ]
-            ))
-                .to.eql([
-                    {
-                        'attr_string': 'val1',
-                        'attr_number': 1,
-                        'attr_boolean': true,
-                        'attr_array': ['val1', 5, null, [true, false]]
-                    },
-                    {
-                        'attr_string': 'val2',
-                        'attr_number': 2,
-                        'attr_boolean': false,
-                        'attr_null': null,
-                        'attr_object': {'foo': ['bar', 'baz']}
-                    },
-                    {
-                        'attr_string': 'val3',
-                        'attr_objects': [
-                            {'foo': 'bar'},
-                            {'john': 'snow'},
-                            {'no-idea': [1, 2]}
-                        ]
-                    }
-                ]
-            );
-        }));
-
         it('Should deserialize class instance', (() => {
             const res = serializer.deserialize<Foo>({
                 'attrString': 'val',
@@ -221,16 +121,16 @@ describe('Serializer service', () => {
         }));
 
         it('Should deserialize array of class instances', (() => {
-            const res = serializer.deserialize<Foo[]>([
+            const res = serializer.deserialize<Foo>([
                 {
-                    'attrString' : 'val',
-                    'attrNumber' : 5,
+                    'attrString': 'val',
+                    'attrNumber': 5,
                     'attrBoolean': true,
                 }, {
-                    'attrString' : 'foo',
-                    'attrNumber' : 10
+                    'attrString': 'foo',
+                    'attrNumber': 10
                 },
-            ], Foo);
+            ], [Foo]);
             expect(res).to.be.an('array').of.length(2);
 
             expect(res[0]).to.be.instanceof(Foo);

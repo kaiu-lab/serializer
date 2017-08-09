@@ -1,4 +1,4 @@
-import { Instantiable } from './instantiable';
+import { Class } from './class';
 
 /**
  * Registrations allow the serializer to handle inheritance,
@@ -21,5 +21,5 @@ import { Instantiable } from './instantiable';
  */
 export interface Registration {
     parent: any;
-    children: { [index: string]: Instantiable };
+    children: { [index: string]: Class };
 }

@@ -1,11 +1,11 @@
 import 'reflect-metadata';
-import { Registration } from './registration';
-import { ParentOptions } from './decorator/parent-options';
-import { Instantiable } from './instantiable';
+import { Class, Instantiable } from './class';
 import { METADATA_DESERIALIZE_AS } from './decorator/deserialize-as';
+import { METADATA_DESERIALIZE_FIELD_NAME } from './decorator/deserialize-field-name';
 import { METADATA_CUSTOM_FIELDS } from './decorator/field-name';
 import { METADATA_PARENT } from './decorator/parent';
-import { METADATA_DESERIALIZE_FIELD_NAME } from './decorator/deserialize-field-name';
+import { ParentOptions } from './decorator/parent-options';
+import { Registration } from './registration';
 
 /**
  * The main class of the serializer, used to deserialize `Objects` into class instances in order to add
@@ -75,51 +75,86 @@ export class Serializer {
     }
 
     /**
-     * Adds a class to a given basic object, adding the whole prototype of the class to the basic object.
+     * Deserialize an object into a specified class.
+     *
+     * @return an instance of the class `T`.
+     */
+    public deserialize<T>(obj: any, clazz: Class<T>): T;
+
+    /**
+     * Deserialize an array of objects into an array of specified classes.
+     *
+     * @return an array of instances of the class `T`.
+     */
+    public deserialize<T>(array: any[], clazz: [Class<T>]): T[];
+
+    /**
+     * Deserialize an object or an array of objects into instances of specified class,
+     * adding the whole prototype of the class to the basic objects.
+     *
+     * For an array of objects, the type specified should be an array of the class.
      * ## Example
      * ```typescript
-     * serializer.deserialize<Bar>({ prop: 'foo' }, Bar);
+     * serializer.deserialize({ prop: 'bar' }, Foo); // -> Foo
+     * serializer.deserialize([{ prop: 'bar' }, {prop: 'baz'}], [Foo]); // -> [Foo, Foo]
      * ```
-     * @param obj The object, usually coming from a simple `JSON.parse`
-     * @param clazz The class constructor.
-     * @returns An instance of the type `T` with the prototype of `clazz` or one of its registered children.
+     *
+     * @returns an instance (or an array of instances) of the class `T`.
      */
-    public deserialize<T>(obj: any, clazz?: any /* TODO See if we can change this any */): T {
-        //if the class parameter is not specified, we can directly return the basic object.
-        if (!clazz) {
-            return obj;
-        }
+    public deserialize<T>(obj: any, clazz: Class<T> | [Class<T>]): T | T[] {
+
         //If the object is an array, we have to handle it as an array.
-        if (obj instanceof Array) {
-            return this.deserializeArray(obj, clazz) as T;
+        if (clazz instanceof Array) {
+            //Check the consistency between the type of deserialization and the type of the given object.
+            if (!(obj instanceof Array)) {
+                const itemClazz = clazz[0];
+                throw new TypeError(`Deserializing an array of ${itemClazz.name} can only work with an array of objects.`);
+            }
+
+            return this.deserializeArray<T>(obj, clazz[0]);
         }
+
+        //Check the consistency between the type of deserialization and the type of the given object.
+        if (obj instanceof Array) {
+            throw new TypeError(`Deserializing an instance of ${clazz.name} can only work with an object, but array given.`);
+        }
+        return this.deserializeObject<T>(obj, clazz);
+    }
+
+    /**
+     * Deserialize an object into a specified class.
+     * @param obj The object.
+     * @param clazz The class constructor.
+     * @return an instance of the class `T`.
+     */
+    private deserializeObject<T>(obj: any, clazz: Class<T>): T {
         //First of all, we'll create an instance of our class
         const result: any = this.getInstance<T>(obj, clazz);
         //And we get the property binding map.
         const properties = this.getPropertyMap(obj, result);
         //Then we copy every property of our object to our instance, using bindings.
-        for (const prop in properties) {
-            const property = properties[prop];
+        for (const originalPropertyName in properties) {
+            const targetPropertyName = properties[originalPropertyName];
             //We get our metadata for the class to deserialize.
-            const propClazz: Instantiable = Reflect.getMetadata(METADATA_DESERIALIZE_AS, result, property);
+            const propClazz: Class = Reflect.getMetadata(METADATA_DESERIALIZE_AS, result, targetPropertyName);
             //If we have some class-related metadata, we'll handle them.
             if (propClazz !== undefined) {
-                result[property] = this.deserialize(obj[prop], propClazz);
+                result[targetPropertyName] = this.deserialize(obj[originalPropertyName], propClazz);
             } else {
                 //Else we can copy the object as it is, since we don't need to create a specific object instance.
-                result[property] = obj[prop];
+                result[targetPropertyName] = obj[originalPropertyName];
             }
         }
         return result as T;
     }
 
     /**
-     * Adds a class to a given array of basic objects.
+     * Deserialize an array of objects into an array of specified classes.
      * @param array The array of objects.
      * @param clazz The class constructor.
-     * @returns An array of instances of the type `T` with the prototype of `clazz`.
+     * @returns An array of instances of the type `T`.
      */
-    private deserializeArray<T>(array: Array<any>, clazz: Instantiable<T>): any {
+    private deserializeArray<T>(array: any[], clazz: Class<T>): T[] {
         const results = [];
         for (const item of array) {
             results.push(this.deserialize<T>(item, clazz));
@@ -135,11 +170,11 @@ export class Serializer {
      * @param clazz The base class of the object, can be an abstract class.
      * @returns An instance of the class we wanted.
      */
-    private getInstance<T>(obj: any, clazz: Instantiable<T>): T {
+    private getInstance<T>(obj: any, clazz: Class<T>): T {
         const parentOptions = this.getParentOptions(clazz);
         // If we don't have metadata for inheritance, we can return the instance of the class we created.
         if (parentOptions === undefined) {
-            return new clazz();
+            return new (clazz as Instantiable<T>)();
         }
         const discriminatorValue = obj[parentOptions.discriminatorField];
         // In case of missing discriminator value...
@@ -149,16 +184,16 @@ export class Serializer {
                 throw new TypeError(`Missing attribute type to discriminate the subclass of ${clazz.name}`);
             }
 
-            return new clazz();
+            return new (clazz as Instantiable<T>)();
         }
-        const resultInstantiable = this.getClass(clazz, obj, parentOptions);
+        const resultInstantiable = this.getInstantiable(clazz, obj, parentOptions);
         return new resultInstantiable();
     }
 
     /**
      * Check if the given parent class has explicitly defined its discriminator value.
      */
-    private parentHasExplicitDiscriminator(clazz: Instantiable): boolean {
+    private parentHasExplicitDiscriminator(clazz: Class): boolean {
         for (const reg of this._registrations) {
             // Ignore registrations that does not concern this parent.
             if (reg.parent !== clazz) {
@@ -183,9 +218,9 @@ export class Serializer {
      * @param options The Options used to configure the parent class.
      * @returns The constructor of the class we're looking for, or the parent constructor if none is found.
      */
-    private getClass(parent: any, obj: any, options: ParentOptions): Instantiable {
+    private getInstantiable(parent: Class, obj: any, options: ParentOptions): Instantiable {
         const discriminatorValue: string = obj[options.discriminatorField];
-        let children: { [index: string]: Instantiable } = {};
+        let children: { [index: string]: Class } = {};
         for (const entry of this._registrations) {
             // If the parent of this entry is the one we're looking for.
             // This allows to declare a map for the same parent in different modules.
@@ -196,7 +231,7 @@ export class Serializer {
         }
         if (children[discriminatorValue] === undefined) {
             if (options.allowSelf) {
-                return parent;
+                return parent as Instantiable;
             } else {
                 throw new TypeError(`No matching subclass for parent class ${parent.name} ` +
                     `with discriminator value ${obj[options.discriminatorField]}`);
@@ -207,15 +242,15 @@ export class Serializer {
         if (childOptions !== undefined
             && childOptions.discriminatorField !== undefined
             && childOptions.discriminatorField !== options.discriminatorField) {
-            return this.getClass(children[discriminatorValue], obj, childOptions);
+            return this.getInstantiable(children[discriminatorValue], obj, childOptions);
         }
-        return children[discriminatorValue];
+        return children[discriminatorValue] as Instantiable;
     }
 
     /**
      * Gets the discriminator field for a given class.
      */
-    private getParentOptions(clazz: Instantiable): ParentOptions | undefined {
+    private getParentOptions(clazz: Class): ParentOptions | undefined {
         return Reflect.getMetadata(METADATA_PARENT, clazz);
     }
 
