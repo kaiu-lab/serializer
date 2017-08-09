@@ -26,11 +26,9 @@ import { Registry } from './registry';
  * This implementation can use a [[Registry]] to handle inheritance.
  * ## Example with inheritance:
  * ```typescript
- * //note: the \@ is only here because of a bug in the documentation library we're using, you should use @Parent
- *
- * \@Parent({
+ * ​@Parent({
  *      discriminatorField: 'type'
- * )
+ * })
  * class Bar {
  *     echo() { return 'I am Bar'; }
  * }
