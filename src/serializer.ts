@@ -105,7 +105,7 @@ export class Serializer {
 
         //If the object is an array, we have to handle it as an array.
         if (clazz instanceof Array) {
-            //Check the consistency bewteen the type of deserialization and the type of the given object.
+            //Check the consistency between the type of deserialization and the type of the given object.
             if (!(obj instanceof Array)) {
                 const itemClazz = clazz[0];
                 throw new TypeError(`Deserializing an array of ${itemClazz.name} can only work with an array of objects.`);
@@ -114,7 +114,7 @@ export class Serializer {
             return this.deserializeArray<T>(obj, clazz[0]);
         }
 
-        //Check the consistency bewteen the type of deserialization and the type of the given object.
+        //Check the consistency between the type of deserialization and the type of the given object.
         if (obj instanceof Array) {
             throw new TypeError(`Deserializing an instance of ${clazz.name} can only work with an object, but array given.`);
         }
