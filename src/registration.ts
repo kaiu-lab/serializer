@@ -1,4 +1,5 @@
 import { Class } from './class';
+import { ParentOptions } from './decorator/parent-options';
 
 /**
  * Registrations allow the serializer to handle inheritance,
@@ -20,6 +21,11 @@ import { Class } from './class';
  * ```
  */
 export interface Registration {
-    parent: any;
+    parent: Class;
     children: { [index: string]: Class };
+}
+
+export interface ProcessedRegistration extends Registration {
+    parentOptions: ParentOptions;
+    parentHasExplicitDiscriminator: boolean;
 }
