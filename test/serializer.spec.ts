@@ -106,6 +106,19 @@ describe('Serializer service', () => {
             expect(res[1]).to.be.instanceof(Foo);
             expect(res[1].getMe()).to.eql('foo - 10');
         }));
+
+        it('Should throw an error if we ask to deserialize an array but the given param is not', () => {
+            const obj: any = {attrString: 'val', attrNumber: 5};
+            expect(() => serializer.deserialize(obj, [Foo]))
+                .to.throw(TypeError, 'Deserializing an array of Foo can only work with an array of objects.');
+        });
+
+        it('Should throw an error if we ask to deserialize an object but the given param is not', () => {
+            const obj: any = [{attrString: 'val', attrNumber: 5}];
+            expect(() => serializer.deserialize(obj, Foo))
+                .to.throw(TypeError, 'Deserializing an instance of Foo can only work with an object, but array given.');
+        });
+
     });
 
     describe('Recursive deserialization tests', () => {
