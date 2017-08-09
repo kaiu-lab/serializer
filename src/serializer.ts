@@ -8,19 +8,46 @@ import { Registry } from './registry';
  * The main class of the serializer, used to deserialize `Objects` into class instances in order to add
  * class's prototype to the object.
  *
- * ## Example:
+ * ## Simple example:
  * ```typescript
  * class Bar {
  *     prop: string;
- *     getProp(): string {
+ *     getProp() {
  *         return this.prop;
  *     }
  * }
- * let serializer = new Serializer();
- * let bar = serializer.deserialize<Bar>({ prop: 'foo' }, Bar);
+ * const serializer = new Serializer();
+ * const bar = serializer.deserialize({ prop: 'foo' }, Bar);
  * console.log(bar.getProp());
+ * // This will print 'foo' to the console because bar is an instance of Bar,
+ * // not a simple Object anymore.
  * ```
- * This will print 'foo' to the console because bar is an instance of `Bar`, not a simple `Object` anymore.
+ *
+ * This implementation can use a [[Registry]] to handle inheritance.
+ * ## Example with inheritance:
+ * ```typescript
+ * //note: the \@ is only here because of a bug in the documentation library we're using, you should use @Parent
+ *
+ * \@Parent({
+ *      discriminatorField: 'type'
+ * )
+ * class Bar {
+ *     echo() { return 'I am Bar'; }
+ * }
+ *
+ * class SubBar extends Bar {
+ *     echo() { return 'I am Sub Bar'; }
+ * }
+ *
+ * const serializer = new Serializer();
+ * serializer.registry.add([
+ *      { parent: Bar, children: { 'sub': SubBar }},
+ * ]);
+ * const bar = serializer.deserialize({ type: 'sub' }, Bar);
+ * console.log(bar.echo());
+ * // This will print 'I am Sub Bar' to the console
+ * // because bar is an instance of SubBar after following the inheritance.
+ * ```
  */
 export class Serializer {
 

@@ -7,12 +7,12 @@ export const METADATA_PARENT = 'serializer:parent';
  *
  * ## Example:
  * ```typescript
- * *note: the \@ is only here because of a bug in the documentation library we're using, you should use @Parent*
+ * //note: the \@ is only here because of a bug in the documentation library we're using, you should use @Parent
  *
  * \@Parent({
- *              discriminatorField: 'type',
- *              allowSelf: true // This one is optional.
- *          })
+ *      discriminatorField: 'type',
+ *      allowSelf: true // This one is optional.
+ * })
  * export class Vehicle{
  *      type: string;
  *      color: Color;

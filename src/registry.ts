@@ -3,6 +3,54 @@ import { METADATA_PARENT } from './decorator/parent';
 import { ParentOptions } from './decorator/parent-options';
 import { ProcessedRegistration, Registration } from './registration';
 
+/**
+ * The registry allows the serializer to handle inheritance.
+ *
+ * ## Example with the default registry:
+ * ```typescript
+ * // Create a new Serializer with the default registry.
+ * const serializer = new Serializer();
+ *
+ * // Then add registrations to the inner registry.
+ * serializer.registry.add([
+ *      {
+ *          parent: Foo,
+ *          children: {
+ *              bar: Bar,
+ *              baz: Baz,
+ *          }
+ *      }
+ * ]);
+ * ```
+ *
+ * ## Example with a specific registry:
+ * ```typescript
+ * // Create the registry.
+ * const registry = new Registry();
+ * registry.add([
+ *      {
+ *          parent: Foo,
+ *          children: {
+ *              bar: Bar,
+ *              baz: Baz,
+ *          }
+ *      }
+ * ]);
+ *
+ * // Then create a Serializer with a specific registry.
+ * const serializer = new Serializer(registry);
+ *
+ * // It is always possible to register new classes after, or to add entries to already known classes.
+ * registry.add([
+ *      {
+ *          parent: Foo,
+ *          children: {
+ *              bar: NewBar,
+ *          }
+ *      }
+ * ]);
+ * ```
+ */
 export class Registry {
 
     /**
@@ -11,22 +59,7 @@ export class Registry {
     private _registrations = new Map<Class, ProcessedRegistration>();
 
     /**
-     * Adds the given registrations to our current registration array.
-     *
-     * ## Example:
-     * ```typescript
-     * let serializer = new Serializer();
-     * serializer.register([
-     *      {
-     *          parent: Foo,
-     *          children: {
-     *              'bar':Bar,
-     *              'baz':Baz
-     *          }
-     *      }
-     * ]);
-     * ```
-     * @param registration The `Registration` array we want to register.
+     * Adds the given registrations to the registry.
      */
     public add(registration: Registration[]): void {
         for (const reg of registration) {
