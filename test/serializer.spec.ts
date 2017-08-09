@@ -190,7 +190,7 @@ describe('Serializer service', () => {
             mockRegistry = mock(serializer.registry);
         });
 
-        it('Should instantiate the class given by the registry', (() => {
+        it('Should instantiate whatever class returned by the registry', (() => {
             mockRegistry.expects('findClass').once().returns(Foo);
             expect(serializer.deserialize({}, Bar)).to.be.instanceOf(Foo);
 

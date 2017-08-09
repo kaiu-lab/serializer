@@ -30,12 +30,29 @@ export class Registry {
      */
     public add(registration: Registration[]): void {
         for (const reg of registration) {
-            const parentOptions: ParentOptions = Reflect.getMetadata(METADATA_PARENT, reg.parent);
 
-            if (parentOptions === undefined) {
-                throw new TypeError(`Class ${reg.parent.name} needs a @Parent decorator to be registered`);
+            const parent = reg.parent;
+            let children: { [index: string]: Class };
+            let parentOptions: ParentOptions;
+
+            //We check if the parent has already been registered
+            const existingReg = this._registrations.get(reg.parent);
+            if (existingReg !== undefined) {
+                //Merge existing children with the new children
+                children = {...existingReg.children, ...reg.children};
+                //Re-use the parent options from the previous registration (no reflect-metadata needed)
+                parentOptions = existingReg.parentOptions;
+            } else {
+                children = reg.children;
+
+                //Get the metadata for this parent and check if it has the @Parent decorator.
+                parentOptions = Reflect.getOwnMetadata(METADATA_PARENT, reg.parent);
+                if (parentOptions === undefined) {
+                    throw new TypeError(`Class ${reg.parent.name} needs a @Parent decorator to be registered`);
+                }
             }
 
+            // Flag to know if the parent is registered among its children.
             let parentHasExplicitDiscriminator = false;
 
             for (const value in reg.children) {
@@ -56,7 +73,7 @@ export class Registry {
                 }
             }
 
-            this._registrations.set(reg.parent, {...reg, parentOptions, parentHasExplicitDiscriminator});
+            this._registrations.set(reg.parent, {parent, children, parentOptions, parentHasExplicitDiscriminator});
         }
     }
 
@@ -77,14 +94,14 @@ export class Registry {
         // In case of missing discriminator value...
         if (discriminatorValue === undefined || discriminatorValue === null) {
             // ...check if the parent allows itself and no explicit discriminators are defined.
-            if (!registration.parentOptions.allowSelf && !registration.parentHasExplicitDiscriminator) {
+            if (!registration.parentOptions.allowSelf || registration.parentHasExplicitDiscriminator) {
                 throw new TypeError(`Missing attribute type to discriminate the subclass of ${clazz.name}`);
             }
 
             return clazz as Instantiable;
         }
 
-        return this.getInstantiable(registration, obj);
+        return this.getInstantiable(registration, obj, discriminatorValue.toString());
     }
 
     /**
@@ -92,20 +109,19 @@ export class Registry {
      *
      * @returns the class we're looking for, or the parent if none is found.
      */
-    private getInstantiable(registration: ProcessedRegistration, obj: any): Instantiable {
+    private getInstantiable(registration: ProcessedRegistration, obj: any, discriminatorValue: string): Instantiable {
+        const child = registration.children[discriminatorValue];
 
-        const discriminatorField = registration.parentOptions.discriminatorField;
-        const discriminatorValue: string = obj[discriminatorField];
-        if (typeof discriminatorValue !== 'string' && typeof discriminatorValue !== 'number') {
-            throw new TypeError(`Field ${discriminatorField} used for ${registration.parent} \
-discrimination should be a string, ${discriminatorValue} given.`);
+        if (child === undefined) {
+            //Method findClass already handle the case for implicit parent discrimination with undefined discriminator
+            throw new TypeError(`No matching subclass for parent class ${registration.parent.name} \
+with discriminator value ${discriminatorValue}.`);
         }
 
-        const child = registration.children[discriminatorValue];
-        if (child === undefined || child === registration.parent) {
+        if (child === registration.parent) {
             if (!registration.parentOptions.allowSelf) {
                 throw new TypeError(`No matching subclass for parent class ${registration.parent.name} \
-with discriminator value ${obj[discriminatorField]}.` );
+with discriminator value ${discriminatorValue}.`);
             }
 
             return registration.parent as Instantiable;

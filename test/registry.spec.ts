@@ -90,6 +90,19 @@ describe('Registry service', () => {
                 .to.throw(TypeError, 'No matching subclass for parent class AbstractFirstLevel with discriminator value fail');
         });
 
+        it('Should throw an error if no children are found with given discriminator and the parent allow itself', () => {
+            registry.add([
+                    {
+                        parent: SecondLevelA,
+                        children: {},
+                    },
+                ],
+            );
+
+            expect(() => registry.findClass(SecondLevelA, {typeA: 'fail'}))
+                .to.throw(TypeError, 'No matching subclass for parent class SecondLevelA with discriminator value fail');
+        });
+
         it('Should throw an error if the registered parent does not have a Parent decorator', () => {
             expect(() => registry.add([
                 {
@@ -240,13 +253,13 @@ describe('Registry service', () => {
 
         it('Should merge registrations of the same parent', () => {
             registry.add([
-                    {
-                        parent: SecondLevelB,
-                        children: {
-                            'child1': ThirdLevelB1,
-                            'childX': ThirdLevelB1,
-                        },
-                    }]);
+                {
+                    parent: SecondLevelB,
+                    children: {
+                        'child1': ThirdLevelB1,
+                        'childX': ThirdLevelB1,
+                    },
+                }]);
 
             expect(registry.findClass(SecondLevelB, {typeB: 'child1'})).to.equal(ThirdLevelB1);
             expect(registry.findClass(SecondLevelB, {typeB: 'childX'})).to.equal(ThirdLevelB1);
@@ -265,6 +278,54 @@ describe('Registry service', () => {
             expect(registry.findClass(SecondLevelB, {typeB: 'child1'})).to.equal(ThirdLevelB1);
             expect(registry.findClass(SecondLevelB, {typeB: 'child2'})).to.equal(ThirdLevelB2);
             expect(registry.findClass(SecondLevelB, {typeB: 'childX'})).to.equal(ThirdLevelB2);
+
+        });
+
+        it('Should change the parentHasExplicitDiscriminator flag when merging registrations', () => {
+            registry.add([
+                {
+                    parent: SecondLevelA,
+                    children: {
+                        'child': ThirdLevelA,
+                    },
+                }]);
+
+            //Get child should work
+            expect(registry.findClass(SecondLevelA, {typeA: 'child'})).to.equal(ThirdLevelA);
+
+            //Get parent itself with IMPLICIT discrimniator should work
+            expect(registry.findClass(SecondLevelA, {typeA: null})).to.equal(SecondLevelA);
+            expect(registry.findClass(SecondLevelA, {typeA: undefined})).to.equal(SecondLevelA);
+            expect(registry.findClass(SecondLevelA, {})).to.equal(SecondLevelA);
+
+            //Get parent itself with EXPLICIT discrimniator should NOT work
+            expect(() => expect(registry.findClass(SecondLevelA, {typeA: 'itself'})))
+                .to.throw(TypeError, 'No matching subclass for parent class SecondLevelA with discriminator value itself');
+
+            registry.add([
+                    {
+                        parent: SecondLevelA,
+                        children: {
+                            'itself': SecondLevelA,
+                        },
+                    },
+                ],
+            );
+
+            //Get child should still work
+            expect(registry.findClass(SecondLevelA, {typeA: 'child'})).to.equal(ThirdLevelA);
+
+            //Get parent itself with EXPLICIT discrimniator should work instead
+            expect(registry.findClass(SecondLevelA, {typeA: 'itself'})).to.equal(SecondLevelA);
+
+            //Get parent itself with IMPLICIT discrimniator should NOT work
+            const expectedError = 'Missing attribute type to discriminate the subclass of SecondLevelA';
+            expect(() => expect(registry.findClass(SecondLevelA, {typeA: null})))
+                .to.throw(TypeError, expectedError);
+            expect(() => expect(registry.findClass(SecondLevelA, {typeA: undefined})))
+                .to.throw(TypeError, expectedError);
+            expect(() => expect(registry.findClass(SecondLevelA, {})))
+                .to.throw(TypeError, expectedError);
 
         });
     });
