@@ -94,19 +94,6 @@ describe('Registry service', () => {
                 .to.throw(TypeError, 'No matching subclass for parent class AbstractFirstLevel with discriminator value fail');
         });
 
-        it('Should throw an error if no children are found with given discriminator and the parent allow itself', () => {
-            registry.add([
-                    {
-                        parent: SecondLevelA,
-                        children: {},
-                    },
-                ],
-            );
-
-            expect(() => registry.findClass(SecondLevelA, {typeA: 'fail'}))
-                .to.throw(TypeError, 'No matching subclass for parent class SecondLevelA with discriminator value fail');
-        });
-
         it('Should throw an error if the registered parent does not have a Parent decorator', () => {
             expect(() => registry.add([
                 {
