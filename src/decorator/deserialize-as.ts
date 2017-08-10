@@ -1,6 +1,9 @@
 import 'reflect-metadata';
 import { Class } from '../class';
 
+/**
+ * @hidden
+ */
 export const METADATA_DESERIALIZE_AS = 'serializer:class';
 
 /**
