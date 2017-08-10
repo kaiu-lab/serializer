@@ -152,11 +152,6 @@ with discriminator value ${discriminatorValue}.`);
         }
 
         if (child === registration.parent) {
-            if (!registration.parentOptions.allowSelf) {
-                throw new TypeError(`No matching subclass for parent class ${registration.parent.name} \
-with discriminator value ${discriminatorValue}.`);
-            }
-
             return registration.parent as Instantiable;
         }
 

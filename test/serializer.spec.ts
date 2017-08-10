@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { mock, SinonMock } from 'sinon';
 import { DeserializeAs, DeserializeFieldName, FieldName, Serializer } from '../src';
+import { Registry } from '../src/registry';
 
 class Foo {
     public attrString: string;
@@ -69,6 +70,10 @@ describe('Serializer service', () => {
 
     it('Should have a working constructor', () => {
         expect(new Serializer()).to.be.instanceof(Serializer);
+    });
+
+    it('Should have a working constructor with registry', () => {
+        expect(new Serializer(new Registry())).to.be.instanceof(Serializer);
     });
 
     describe('Basic deserialization tests', () => {

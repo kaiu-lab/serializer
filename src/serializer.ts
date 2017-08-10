@@ -49,7 +49,8 @@ import { Registry } from './registry';
  */
 export class Serializer {
 
-    constructor(public readonly registry = new Registry()) {}
+    constructor(public readonly registry = new Registry()) {
+    }
 
     /**
      * Deserialize an object into a specified class.
@@ -152,13 +153,9 @@ export class Serializer {
     private getPropertyMap(obj: any, instance: any): { [index: string]: string } {
         const propsMap: { [index: string]: string } = {};
         //We create a first property map based on obj's properties.
-        for (const prop in obj) {
-            //Simple check to avoid iterations over strange things.
-            if (obj.hasOwnProperty(prop)) {
-                //The initial map will have identical keys and values.
-                propsMap[prop] = prop;
-            }
-        }
+        Object.keys(obj).forEach(prop => {
+            propsMap[prop] = prop;
+        });
         //We get our metadata registry for custom properties
         const customProperties = Reflect.getMetadata(METADATA_CUSTOM_FIELDS, instance);
         if (customProperties === undefined) {
