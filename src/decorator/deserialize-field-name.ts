@@ -1,5 +1,8 @@
 import { METADATA_CUSTOM_FIELDS } from './field-name';
 
+/**
+ * @hidden
+ */
 export const METADATA_DESERIALIZE_FIELD_NAME = 'serializer:deserialize:field';
 /**
  * Tags a property to map from a different field name upon deserialization.

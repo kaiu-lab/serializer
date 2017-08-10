@@ -24,6 +24,9 @@ export interface Registration {
     parent: Class;
     children: { [index: string]: Class };
 }
+/**
+ * @hidden
+ */
 
 export interface ProcessedRegistration extends Registration {
     parentOptions: ParentOptions;
