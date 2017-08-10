@@ -204,23 +204,6 @@ describe('Registry service', () => {
             expect(() => expect(registry.findClass(SecondLevelB, {})))
                 .to.throw(TypeError, expectedError);
         });
-
-        it('Should throw an error if the discriminator value has no subclass and the parent does not allow itself', () => {
-            registry.add([
-                    {
-                        parent: SecondLevelB,
-                        children: {
-                            'child': ThirdLevelB1,
-                        },
-                    },
-                ],
-            );
-
-            const expectedError = 'No matching subclass for parent class SecondLevelB with discriminator value fail';
-
-            expect(() => expect(registry.findClass(SecondLevelB, {typeB: 'fail'})))
-                .to.throw(TypeError, expectedError);
-        });
     });
 
     describe('Override registration tests', () => {
