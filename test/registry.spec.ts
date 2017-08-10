@@ -36,7 +36,11 @@ describe('Registry service', () => {
         registry = new Registry();
     });
 
-    describe('Basic utilisation', () => {
+    it('Should have a working constructor', () => {
+        expect(new Registry()).to.be.instanceof(Registry);
+    });
+
+    describe('Basic usage', () => {
         it('Should use discriminant field to find correct child', (() => {
             registry.add([
                 {
@@ -200,10 +204,27 @@ describe('Registry service', () => {
             expect(() => expect(registry.findClass(SecondLevelB, {})))
                 .to.throw(TypeError, expectedError);
         });
+
+        it('Should throw an error if the discriminator value has no subclass and the parent does not allow itself', () => {
+            registry.add([
+                    {
+                        parent: SecondLevelB,
+                        children: {
+                            'child': ThirdLevelB1,
+                        },
+                    },
+                ],
+            );
+
+            const expectedError = 'No matching subclass for parent class SecondLevelB with discriminator value fail';
+
+            expect(() => expect(registry.findClass(SecondLevelB, {typeB: 'fail'})))
+                .to.throw(TypeError, expectedError);
+        });
     });
 
     describe('Override registration tests', () => {
-        it('Should allow multiple registration of the same class under multiple discriminator value', () => {
+        it('Should allow multiple registrations of the same class under multiple discriminator values', () => {
             registry.add([
                     {
                         parent: AbstractFirstLevel,
@@ -293,12 +314,12 @@ describe('Registry service', () => {
             //Get child should work
             expect(registry.findClass(SecondLevelA, {typeA: 'child'})).to.equal(ThirdLevelA);
 
-            //Get parent itself with IMPLICIT discrimniator should work
+            //Get parent itself with IMPLICIT discriminator should work
             expect(registry.findClass(SecondLevelA, {typeA: null})).to.equal(SecondLevelA);
             expect(registry.findClass(SecondLevelA, {typeA: undefined})).to.equal(SecondLevelA);
             expect(registry.findClass(SecondLevelA, {})).to.equal(SecondLevelA);
 
-            //Get parent itself with EXPLICIT discrimniator should NOT work
+            //Get parent itself with EXPLICIT discriminator should NOT work
             expect(() => expect(registry.findClass(SecondLevelA, {typeA: 'itself'})))
                 .to.throw(TypeError, 'No matching subclass for parent class SecondLevelA with discriminator value itself');
 
@@ -315,10 +336,10 @@ describe('Registry service', () => {
             //Get child should still work
             expect(registry.findClass(SecondLevelA, {typeA: 'child'})).to.equal(ThirdLevelA);
 
-            //Get parent itself with EXPLICIT discrimniator should work instead
+            //Get parent itself with EXPLICIT discriminator should work instead
             expect(registry.findClass(SecondLevelA, {typeA: 'itself'})).to.equal(SecondLevelA);
 
-            //Get parent itself with IMPLICIT discrimniator should NOT work
+            //Get parent itself with IMPLICIT discriminator should NOT work
             const expectedError = 'Missing attribute type to discriminate the subclass of SecondLevelA';
             expect(() => expect(registry.findClass(SecondLevelA, {typeA: null})))
                 .to.throw(TypeError, expectedError);
