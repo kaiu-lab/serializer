@@ -23,7 +23,7 @@ Serializer is a serialization library written in Typescript made to handle typin
 
 Install through npm:
 ```bash 
-npm install --save serializer
+npm install --save @kaiu/serializer
 ```
 
 ## Documentation
