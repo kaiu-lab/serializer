@@ -6,7 +6,8 @@
     "types": "./index.d.ts",
     "scripts": {
         "build:umd": "webpack --config webpack.config.umd.ts",
-        "build:dist": "npm run build:umd",
+        "build:dist": "npm run build:umd && npm run build:ngc",
+        "build:ngc": "ngc -p tsconfig-ngc.json",
         "build:clean": "del-cli dist",
         "test": "karma start --single-run && npm run build:dist && npm run build:clean",
         "test:watch": "karma start --auto-watch",
@@ -48,6 +49,9 @@
     },
     "homepage": "https://github.com/kaiu-lab/serializer#readme",
     "devDependencies": {
+        "@angular/compiler": "^4.3.3",
+        "@angular/compiler-cli": "^4.3.3",
+        "@angular/core": "^4.3.3",
         "@types/chai": "^4.0.0",
         "@types/mocha": "^2.2.41",
         "@types/node": "^8.0.10",
@@ -72,6 +76,7 @@
         "karma-webpack": "^2.0.1",
         "mocha": "^3.3.0",
         "reflect-metadata": "^0.1.10",
+        "rxjs": "^5.0.1",
         "sinon": "^3.1.0",
         "sinon-chai": "^2.8.0",
         "standard-version": "^4.0.0",
