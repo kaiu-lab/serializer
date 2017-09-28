@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { Class, Instantiable } from './class';
 import { METADATA_PARENT } from './decorator/parent';
 import { ParentOptions } from './decorator/parent-options';
