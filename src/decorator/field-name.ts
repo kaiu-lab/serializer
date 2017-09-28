@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { METADATA_DESERIALIZE_FIELD_NAME } from './deserialize-field-name';
 
 /**

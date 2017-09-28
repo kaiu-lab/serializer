@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { METADATA_CUSTOM_FIELDS } from './field-name';
 
 /**

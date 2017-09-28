@@ -17,6 +17,7 @@ export default {
         libraryTarget: 'umd',
         library: 'serializer'
     },
+    externals: ['reflect-metadata'],
     devtool: 'source-map',
     module: {
         rules: [{
