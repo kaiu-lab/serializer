@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.0.3"></a>
+## [1.0.3](https://github.com/kaiu-lab/serializer/compare/v1.0.2...v1.0.3) (2018-01-07)
+
+
+### Bug Fixes
+
+* **security:** update package `marked` used by `typedoc` with known vulnerabilities ([07dcf47](https://github.com/kaiu-lab/serializer/commit/07dcf47))
+
+
+
 <a name="1.0.2"></a>
 ## [1.0.2](https://github.com/kaiu-lab/serializer/compare/v1.0.1...v1.0.2) (2017-09-28)
 
