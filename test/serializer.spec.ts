@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import { mock, SinonMock } from 'sinon';
-import { DeserializeAs, DeserializeFieldName, FieldName, Serializer } from '../src';
-import { Registry } from '../src';
+import { DeserializeAs, DeserializeFieldName, FieldName, Registry, Serializer } from '../src';
 import { SerializeFieldName } from '../src/decorator/serialize-field-name';
 import { Transient } from '../src/decorator/transient';
 
