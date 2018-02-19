@@ -132,7 +132,7 @@ export class Serializer {
     public serialize(data: any): string {
         //We have to create a clone of data in order to avoid deleting properties in the original object.
         const obj = JSON.parse(JSON.stringify(data));
-        //First of all, we have to map the data object in order to process transient fields and cutom field names.
+        //First of all, we have to map the data object in order to process transient fields and custom field names.
         Object.keys(obj).forEach(propertyKey => {
             //First of all, check if property is transient, as we don't have to go further if it is.
             if (Reflect.getMetadata(METADATA_TRANSIENT_PROPERTY, data, propertyKey)) {
