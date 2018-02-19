@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { METADATA_DESERIALIZE_FIELD_NAME } from './deserialize-field-name';
+import { METADATA_SERIALIZE_FIELD_NAME } from './serialize-field-name';
 
 /**
  * @hidden
@@ -29,5 +30,6 @@ export function FieldName(fieldName: string): (...args: any[]) => void {
         const customFieldNames = Reflect.getMetadata(METADATA_CUSTOM_FIELDS, target) || [];
         Reflect.defineMetadata(METADATA_CUSTOM_FIELDS, [ ...customFieldNames, propertyKey], target);
         Reflect.defineMetadata(METADATA_DESERIALIZE_FIELD_NAME, fieldName, target, propertyKey);
+        Reflect.defineMetadata(METADATA_SERIALIZE_FIELD_NAME, fieldName, target, propertyKey);
     };
 }

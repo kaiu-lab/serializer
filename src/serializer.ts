@@ -4,6 +4,9 @@ import { METADATA_DESERIALIZE_AS } from './decorator/deserialize-as';
 import { METADATA_DESERIALIZE_FIELD_NAME } from './decorator/deserialize-field-name';
 import { METADATA_CUSTOM_FIELDS } from './decorator/field-name';
 import { Registry } from './registry';
+import { METADATA_SERIALIZE_FIELD_NAME } from './decorator/serialize-field-name';
+import { METADATA_TRANSIENT_PROPERTY } from './decorator/transient';
+
 /**
  * The main class of the serializer, used to deserialize `Objects` into class instances in order to add
  * class's prototype to the object.
@@ -100,6 +103,53 @@ export class Serializer {
     }
 
     /**
+     * Serialize an object into JSON string, taking Decorators in count for it.
+     *
+     * `@FieldName`, `@SerializeFieldName` and `@Transient` can affect this method.
+     *
+     * Example:
+     *
+     * ```typescript
+     * export class Example{
+     *      @SerializeFieldName('bar')
+     *      foo: string;
+     *
+     *      @Transient()
+     *      password: string;
+     * }
+     *
+     * const obj = new Example();
+     * obj.foo = 'baz'
+     * const result = serializer.serialize(obj);
+     * console.log(obj);
+     * ```
+     *
+     * This will print a JSON string for `obj`, without `password` property in it, and `foo` property renamed to `bar`.
+     *
+     * @param data
+     * @returns {string}
+     */
+    public serialize(data: any): string {
+        //We have to create a clone of data in order to avoid deleting properties in the original object.
+        const obj = JSON.parse(JSON.stringify(data));
+        //First of all, we have to map the data object in order to process transient fields and cutom field names.
+        Object.keys(obj).forEach(propertyKey => {
+            //First of all, check if property is transient, as we don't have to go further if it is.
+            if (Reflect.getMetadata(METADATA_TRANSIENT_PROPERTY, data, propertyKey)) {
+                delete obj[propertyKey];
+                return;
+            }
+            //We need to get metadata from data as obj doesn't have metadata informations.
+            const customFieldName = Reflect.getMetadata(METADATA_SERIALIZE_FIELD_NAME, data, propertyKey);
+            if (customFieldName !== undefined) {
+                obj[customFieldName] = obj[propertyKey];
+                delete obj[propertyKey];
+            }
+        });
+        return JSON.stringify(obj);
+    }
+
+    /**
      * Deserialize an object into a specified class.
      * @param obj The object.
      * @param clazz The class constructor.
@@ -112,7 +162,7 @@ export class Serializer {
         const result = new instantiable();
 
         //And we get the property binding map.
-        const properties = this.getPropertyMap(obj, result);
+        const properties = this.getDeserializePropertyMap(obj, result);
         //Then we copy every property of our object to our instance, using bindings.
         for (const originalPropertyName in properties) {
             const targetPropertyName = properties[originalPropertyName];
@@ -144,13 +194,13 @@ export class Serializer {
     }
 
     /**
-     * Returns the fields used to map data properties on result's ones.
+     * Returns the fields used to map data properties on result's ones for deserialization.
      *
      * @param instance An instance of the class we're using.
      * @param obj The current object we're deserializing.
      * @returns A custom array containing obj's field as index and corresponding result's field as value.
      */
-    private getPropertyMap(obj: any, instance: any): { [index: string]: string } {
+    private getDeserializePropertyMap(obj: any, instance: any): { [index: string]: string } {
         const propsMap: { [index: string]: string } = {};
         //We create a first property map based on obj's properties.
         Object.keys(obj).forEach(prop => {
