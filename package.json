@@ -1,6 +1,6 @@
 {
   "name": "@kaiu/serializer",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Simple JSON deserializer for typescipt applications",
   "main": "./bundles/serializer.umd.js",
   "types": "./index.d.ts",
