@@ -1,7 +1,8 @@
 import { expect } from 'chai';
 import { mock, SinonMock } from 'sinon';
-import { DeserializeAs, DeserializeFieldName, FieldName, Serializer } from '../src';
-import { Registry } from '../src/registry';
+import { DeserializeAs, DeserializeFieldName, FieldName, Registry, Serializer } from '../src';
+import { SerializeFieldName } from '../src/decorator/serialize-field-name';
+import { Transient } from '../src/decorator/transient';
 
 class Foo {
     public attrString: string;
@@ -62,6 +63,18 @@ class DifferentFieldNameWithClass {
 class DifferentFieldNameArray {
     @FieldName('foo')
     bar: number[];
+}
+
+class DifferentFieldNameSerialize {
+    @SerializeFieldName('foo')
+    bar: string;
+}
+
+class TransientProperty {
+    bar: string;
+
+    @Transient()
+    password: string;
 }
 
 describe('Serializer service', () => {
@@ -216,5 +229,32 @@ describe('Serializer service', () => {
             mockRegistry.verify();
         }));
 
+    });
+
+    describe('Serialization tests', () => {
+
+        it('Should be able to serialize classic Javascript object', () => {
+            expect(serializer.serialize({
+                foo: 'bar',
+                baz: 257,
+                kek: true
+            })).to.equal('{"foo":"bar","baz":257,"kek":true}');
+        });
+
+        it('Should be able to use custom field names', () => {
+            const mockFieldName = new DifferentFieldName();
+            mockFieldName.bar = 'baz';
+            expect(serializer.serialize(mockFieldName)).to.equal('{"foo":"baz"}');
+            const mockSerializeFieldName = new DifferentFieldNameSerialize();
+            mockSerializeFieldName.bar = 'baz';
+            expect(serializer.serialize(mockSerializeFieldName)).to.equal('{"foo":"baz"}');
+        });
+
+        it('Should be able to use Transient decorator', () => {
+            const mockTransient = new TransientProperty();
+            mockTransient.bar = 'foo';
+            mockTransient.password = 'Super secret';
+            expect(serializer.serialize(mockTransient)).to.equal('{"bar":"foo"}');
+        });
     });
 });
