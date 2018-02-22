@@ -99,7 +99,7 @@ export class Serializer {
         if (obj instanceof Array) {
             throw new TypeError(`Deserializing an instance of ${clazz.name} can only work with an object, but array given.`);
         }
-        return this.deserializeObject<T>(obj, clazz);
+        return this.deserializeObject<T>(obj, clazz, additionalData);
     }
 
     /**
