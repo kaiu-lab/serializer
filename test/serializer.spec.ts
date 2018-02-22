@@ -1,8 +1,7 @@
 import { expect } from 'chai';
 import { mock, SinonMock } from 'sinon';
 import { DeserializeAs, DeserializeFieldName, FieldName, Registry, Serializer } from '../src';
-import { SerializeFieldName } from '../src/decorator/serialize-field-name';
-import { Transient } from '../src/decorator/transient';
+import { SerializeFieldName, Transient } from '../src/decorator';
 
 class Foo {
     public attrString: string;
@@ -75,6 +74,13 @@ class TransientProperty {
 
     @Transient()
     password: string;
+}
+
+class RecursiveTransient {
+
+    bar: string;
+
+    data: TransientProperty;
 }
 
 describe('Serializer service', () => {
@@ -255,6 +261,15 @@ describe('Serializer service', () => {
             mockTransient.bar = 'foo';
             mockTransient.password = 'Super secret';
             expect(serializer.serialize(mockTransient)).to.equal('{"bar":"foo"}');
+        });
+
+        it('Should be able to handle recursion', () => {
+            const obj = new RecursiveTransient();
+            obj.bar = 'foo';
+            obj.data = new TransientProperty();
+            obj.data.bar = 'baz';
+            obj.data.password = 'Super secret';
+            expect(serializer.serialize(obj)).to.equal('{"bar":"foo","data":{"bar":"baz"}}');
         });
     });
 });

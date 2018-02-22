@@ -60,14 +60,14 @@ export class Serializer {
      *
      * @return an instance of the class `T`.
      */
-    public deserialize<T>(obj: any, clazz: Class<T>): T;
+    public deserialize<T>(obj: any, clazz: Class<T>, additionalData?: any): T;
 
     /**
      * Deserialize an array of objects into an array of specified classes.
      *
      * @return an array of instances of the class `T`.
      */
-    public deserialize<T>(array: any[], clazz: [Class<T>]): T[];
+    public deserialize<T>(array: any[], clazz: [Class<T>], additionalData?: any): T[];
 
     /**
      * Deserialize an object or an array of objects into instances of specified class,
@@ -82,7 +82,7 @@ export class Serializer {
      *
      * @returns an instance (or an array of instances) of the class `T`.
      */
-    public deserialize<T>(obj: any, clazz: Class<T> | [Class<T>]): T | T[] {
+    public deserialize<T>(obj: any, clazz: Class<T> | [Class<T>], additionalData?: any): T | T[] {
 
         //If the object is an array, we have to handle it as an array.
         if (clazz instanceof Array) {
@@ -92,7 +92,7 @@ export class Serializer {
                 throw new TypeError(`Deserializing an array of ${itemClazz.name} can only work with an array of objects.`);
             }
 
-            return this.deserializeArray<T>(obj, clazz[0]);
+            return this.deserializeArray<T>(obj, clazz[0], additionalData);
         }
 
         //Check the consistency between the type of deserialization and the type of the given object.
@@ -127,35 +127,54 @@ export class Serializer {
      * This will print a JSON string for `obj`, without `password` property in it, and `foo` property renamed to `bar`.
      *
      * @param data
+     * @param additionalData additional data you want to add to keep trace of a context during serialization in a
+     * child class, the goal behind that is to provide a way for serializers extending this one to use custom data
+     * across a single object, no matter how deep we are in the object.
      * @returns {string}
      */
-    public serialize(data: any): string {
+    public serialize(data: any, additionalData?: any): string {
         //We have to create a clone of data in order to avoid deleting properties in the original object.
-        const obj = JSON.parse(JSON.stringify(data));
-        //First of all, we have to map the data object in order to process transient fields and custom field names.
-        Object.keys(obj).forEach(propertyKey => {
-            //First of all, check if property is transient, as we don't have to go further if it is.
-            if (Reflect.getMetadata(METADATA_TRANSIENT_PROPERTY, data, propertyKey)) {
-                delete obj[propertyKey];
-                return;
-            }
-            //We need to get metadata from data as obj doesn't have metadata informations.
-            const customFieldName = Reflect.getMetadata(METADATA_SERIALIZE_FIELD_NAME, data, propertyKey);
-            if (customFieldName !== undefined) {
-                obj[customFieldName] = obj[propertyKey];
-                delete obj[propertyKey];
-            }
-        });
+        const obj = this.prepareSerialize(JSON.parse(JSON.stringify(data)), data, additionalData);
         return JSON.stringify(obj);
+    }
+
+    protected prepareSerialize(obj: any, instance: any, propertyKey?: string, additionalData?: any): any {
+        let target = propertyKey === undefined ? obj : obj[propertyKey];
+        const targetInstance = propertyKey === undefined ? instance : instance[propertyKey];
+        //First of all, we have to map the data object in order to process transient fields and custom field names.
+        // If this is not an object, we can skip the recursion part
+        if (target !== null && typeof target === 'object') {
+            // Else, for each property, we have to transform the object to handle the specific case of each property.
+            for (const key of Object.keys(target)) {
+                target = this.prepareSerialize(target, targetInstance, key, additionalData);
+            }
+        }
+        if (propertyKey !== undefined) {
+            //First of all, check if property is transient, as we don't have to go further if it is.
+            if (Reflect.getMetadata(METADATA_TRANSIENT_PROPERTY, instance, propertyKey)) {
+                delete obj[propertyKey];
+            } else {
+                //We need to get metadata from data as targetObj doesn't have metadata informations.
+                const customFieldName = Reflect.getMetadata(METADATA_SERIALIZE_FIELD_NAME, instance, propertyKey);
+                if (customFieldName !== undefined) {
+                    obj[customFieldName] = obj[propertyKey];
+                    delete obj[propertyKey];
+                }
+            }
+        }
+        return obj;
     }
 
     /**
      * Deserialize an object into a specified class.
      * @param obj The object.
      * @param clazz The class constructor.
+     * @param additionalData additional data you want to add to keep trace of a context during serialization in a
+     * child class, the goal behind that is to provide a way for serializers extending this one to use custom data
+     * across a single object, no matter how deep we are in the object.
      * @return an instance of the class `T`.
      */
-    private deserializeObject<T>(obj: any, clazz: Class<T>): T {
+    protected deserializeObject<T>(obj: any, clazz: Class<T>, additionalData?: any): T {
         //First of all, we'll find if the registry knows any subclass
         const instantiable: Instantiable = this.registry.findClass(clazz, obj);
 
@@ -170,7 +189,7 @@ export class Serializer {
             const propClazz: Class = Reflect.getMetadata(METADATA_DESERIALIZE_AS, result, targetPropertyName);
             //If we have some class-related metadata, we'll handle them.
             if (propClazz !== undefined) {
-                result[targetPropertyName] = this.deserialize(obj[originalPropertyName], propClazz);
+                result[targetPropertyName] = this.deserialize(obj[originalPropertyName], propClazz, additionalData);
             } else {
                 //Else we can copy the object as it is, since we don't need to create a specific object instance.
                 result[targetPropertyName] = obj[originalPropertyName];
@@ -183,12 +202,15 @@ export class Serializer {
      * Deserialize an array of objects into an array of specified classes.
      * @param array The array of objects.
      * @param clazz The class constructor.
+     * @param additionalData additional data you want to add to keep trace of a context during serialization in a
+     * child class, the goal behind that is to provide a way for serializers extending this one to use custom data
+     * across a single object, no matter how deep we are in the object.
      * @returns An array of instances of the type `T`.
      */
-    private deserializeArray<T>(array: any[], clazz: Class<T>): T[] {
+    protected deserializeArray<T>(array: any[], clazz: Class<T>, additionalData?: any): T[] {
         const results = [];
         for (const item of array) {
-            results.push(this.deserialize<T>(item, clazz));
+            results.push(this.deserialize<T>(item, clazz, additionalData));
         }
         return results;
     }
@@ -200,7 +222,7 @@ export class Serializer {
      * @param obj The current object we're deserializing.
      * @returns A custom array containing obj's field as index and corresponding result's field as value.
      */
-    private getDeserializePropertyMap(obj: any, instance: any): { [index: string]: string } {
+    protected getDeserializePropertyMap(obj: any, instance: any): { [index: string]: string } {
         const propsMap: { [index: string]: string } = {};
         //We create a first property map based on obj's properties.
         Object.keys(obj).forEach(prop => {
