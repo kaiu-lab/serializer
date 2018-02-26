@@ -138,6 +138,9 @@ export class Serializer {
         return JSON.stringify(obj);
     }
 
+    protected prepareSerialize(obj: any, instance: any): any;
+    protected prepareSerialize(obj: any, instance: any, propertyKey: string): any;
+    protected prepareSerialize(obj: any, instance: any, propertyKey: string, additionalData: any): any;
     /**
      * Prepares an object for serialization, recursively.
      * @param obj The object to prepare
