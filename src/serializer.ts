@@ -138,6 +138,14 @@ export class Serializer {
         return JSON.stringify(obj);
     }
 
+    /**
+     * Prepares an object for serialization, recursively.
+     * @param obj The object to prepare
+     * @param instance An instance of the object to prepare for serialization.
+     * @param {string} propertyKey Optional, the property key to check, used in recursion.
+     * @param additionalData Optional, Additional data you want to pass through recursion.
+     * @returns {any}
+     */
     protected prepareSerialize(obj: any, instance: any, propertyKey?: string, additionalData?: any): any {
         let target = propertyKey === undefined ? obj : obj[propertyKey];
         const targetInstance = propertyKey === undefined ? instance : instance[propertyKey];
