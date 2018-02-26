@@ -139,17 +139,17 @@ export class Serializer {
     }
 
     protected prepareSerialize(obj: any, instance: any): any;
-    protected prepareSerialize(obj: any, instance: any, propertyKey: string): any;
-    protected prepareSerialize(obj: any, instance: any, propertyKey: string, additionalData: any): any;
+    protected prepareSerialize(obj: any, instance: any, additionalData: any): any;
+    protected prepareSerialize(obj: any, instance: any, additionalData: any, propertyKey: string): any;
     /**
      * Prepares an object for serialization, recursively.
      * @param obj The object to prepare
      * @param instance An instance of the object to prepare for serialization.
-     * @param {string} propertyKey Optional, the property key to check, used in recursion.
      * @param additionalData Optional, Additional data you want to pass through recursion.
+     * @param {string} propertyKey Optional, the property key to check, used in recursion.
      * @returns {any}
      */
-    protected prepareSerialize(obj: any, instance: any, propertyKey?: string, additionalData?: any): any {
+    protected prepareSerialize(obj: any, instance: any, additionalData?: any, propertyKey?: string): any {
         let target = propertyKey === undefined ? obj : obj[propertyKey];
         const targetInstance = propertyKey === undefined ? instance : instance[propertyKey];
         //First of all, we have to map the data object in order to process transient fields and custom field names.
@@ -157,7 +157,7 @@ export class Serializer {
         if (target !== null && typeof target === 'object') {
             // Else, for each property, we have to transform the object to handle the specific case of each property.
             for (const key of Object.keys(target)) {
-                target = this.prepareSerialize(target, targetInstance, key, additionalData);
+                target = this.prepareSerialize(target, targetInstance, additionalData, key);
             }
         }
         if (propertyKey !== undefined) {
