@@ -175,6 +175,10 @@ export class Serializer {
      * @return an instance of the class `T`.
      */
     protected deserializeObject<T>(obj: any, clazz: Class<T>, additionalData?: any): T {
+        // We have to create a breakpoint on recursion here, if it's not an object, then you can just return it.
+        if (typeof(obj) !== 'object') {
+            return obj;
+        }
         //First of all, we'll find if the registry knows any subclass
         const instantiable: Instantiable = this.registry.findClass(clazz, obj);
 
@@ -192,7 +196,7 @@ export class Serializer {
                 result[targetPropertyName] = this.deserialize(obj[originalPropertyName], propClazz, additionalData);
             } else {
                 //Else we can copy the object as it is, since we don't need to create a specific object instance.
-                result[targetPropertyName] = obj[originalPropertyName];
+                result[targetPropertyName] = this.deserialize(obj[originalPropertyName], propClazz, additionalData);
             }
         }
         return result as T;
