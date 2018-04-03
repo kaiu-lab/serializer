@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.2.0"></a>
+# [1.2.0](https://github.com/kaiu-lab/serializer/compare/v1.1.1...v1.2.0) (2018-04-03)
+
+
+### Features
+
+* add possibility to add custom data to go through recursion ([f7826f3](https://github.com/kaiu-lab/serializer/commit/f7826f3))
+
+
+### Reverts
+
+* recurse even if no class annotation found, but stop if not object ([9c7bbb5](https://github.com/kaiu-lab/serializer/commit/9c7bbb5))
+
+
+
 <a name="1.1.1"></a>
 ## [1.1.1](https://github.com/kaiu-lab/serializer/compare/v1.1.0...v1.1.1) (2018-02-20)
 
