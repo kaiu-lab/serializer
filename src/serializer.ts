@@ -1,11 +1,11 @@
 import 'reflect-metadata';
-import { Class, Instantiable } from './class';
-import { METADATA_DESERIALIZE_AS } from './decorator/deserialize-as';
-import { METADATA_DESERIALIZE_FIELD_NAME } from './decorator/deserialize-field-name';
-import { METADATA_CUSTOM_FIELDS } from './decorator/field-name';
-import { Registry } from './registry';
-import { METADATA_SERIALIZE_FIELD_NAME } from './decorator/serialize-field-name';
-import { METADATA_TRANSIENT_PROPERTY } from './decorator/transient';
+import {Class, Instantiable} from './class';
+import {METADATA_DESERIALIZE_AS} from './decorator/deserialize-as';
+import {METADATA_DESERIALIZE_FIELD_NAME} from './decorator/deserialize-field-name';
+import {METADATA_CUSTOM_FIELDS} from './decorator/field-name';
+import {Registry} from './registry';
+import {METADATA_SERIALIZE_FIELD_NAME} from './decorator/serialize-field-name';
+import {METADATA_TRANSIENT_PROPERTY} from './decorator/transient';
 
 /**
  * The main class of the serializer, used to deserialize `Objects` into class instances in order to add
@@ -203,7 +203,10 @@ export class Serializer {
                 result[targetPropertyName] = this.deserialize(obj[originalPropertyName], propClazz, additionalData);
             } else {
                 //Else we can copy the object as it is, since we don't need to create a specific object instance.
-                result[targetPropertyName] = obj[originalPropertyName];
+                //But keep in mind we only want to copy the value if it's not undefined, to avoid overriding default values.
+                if (obj[originalPropertyName] !== undefined) {
+                    result[targetPropertyName] = obj[originalPropertyName];
+                }
             }
         }
         return result as T;
