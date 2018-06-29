@@ -1,11 +1,11 @@
 import 'reflect-metadata';
-import {Class, Instantiable} from './class';
-import {METADATA_DESERIALIZE_AS} from './decorator/deserialize-as';
-import {METADATA_DESERIALIZE_FIELD_NAME} from './decorator/deserialize-field-name';
-import {METADATA_CUSTOM_FIELDS} from './decorator/field-name';
-import {Registry} from './registry';
-import {METADATA_SERIALIZE_FIELD_NAME} from './decorator/serialize-field-name';
-import {METADATA_TRANSIENT_PROPERTY} from './decorator/transient';
+import { Class, Instantiable } from './class';
+import { METADATA_DESERIALIZE_AS } from './decorator/deserialize-as';
+import { METADATA_DESERIALIZE_FIELD_NAME } from './decorator/deserialize-field-name';
+import { METADATA_CUSTOM_FIELDS } from './decorator/field-name';
+import { Registry } from './registry';
+import { METADATA_SERIALIZE_FIELD_NAME } from './decorator/serialize-field-name';
+import { METADATA_TRANSIENT_PROPERTY } from './decorator/transient';
 
 /**
  * The main class of the serializer, used to deserialize `Objects` into class instances in order to add
