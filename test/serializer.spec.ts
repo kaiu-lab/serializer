@@ -1,7 +1,7 @@
-import {expect} from 'chai';
-import {mock, SinonMock} from 'sinon';
-import {DeserializeAs, DeserializeFieldName, FieldName, Registry, Serializer} from '../src';
-import {SerializeFieldName, Transient} from '../src/decorator';
+import { expect } from 'chai';
+import { mock, SinonMock } from 'sinon';
+import { DeserializeAs, DeserializeFieldName, FieldName, Registry, Serializer } from '../src';
+import { SerializeFieldName, Transient } from '../src/decorator';
 
 class Foo {
     public attrString: string;
