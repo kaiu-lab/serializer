@@ -1,7 +1,7 @@
-import { expect } from 'chai';
-import { mock, SinonMock } from 'sinon';
-import { DeserializeAs, DeserializeFieldName, FieldName, Registry, Serializer } from '../src';
-import { SerializeFieldName, Transient } from '../src/decorator';
+import {expect} from 'chai';
+import {mock, SinonMock} from 'sinon';
+import {DeserializeAs, DeserializeFieldName, FieldName, Registry, Serializer} from '../src';
+import {SerializeFieldName, Transient} from '../src/decorator';
 
 class Foo {
     public attrString: string;
@@ -81,6 +81,10 @@ class RecursiveTransient {
     bar: string;
 
     data: TransientProperty;
+}
+
+class ClassWithDefaultValue {
+    id = 'default';
 }
 
 describe('Serializer service', () => {
@@ -270,6 +274,11 @@ describe('Serializer service', () => {
             obj.data.bar = 'baz';
             obj.data.password = 'Super secret';
             expect(serializer.serialize(obj)).to.equal('{"bar":"foo","data":{"bar":"baz"}}');
+        });
+
+        it('shouldn\'t copy over default value if new value is undefined', () => {
+            const obj = {};
+            expect(serializer.deserialize<ClassWithDefaultValue>(obj, ClassWithDefaultValue).id).to.equal('default');
         });
     });
 });
