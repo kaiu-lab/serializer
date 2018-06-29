@@ -83,6 +83,10 @@ class RecursiveTransient {
     data: TransientProperty;
 }
 
+class ClassWithDefaultValue {
+    id = 'default';
+}
+
 describe('Serializer service', () => {
 
     let serializer: Serializer;
@@ -270,6 +274,11 @@ describe('Serializer service', () => {
             obj.data.bar = 'baz';
             obj.data.password = 'Super secret';
             expect(serializer.serialize(obj)).to.equal('{"bar":"foo","data":{"bar":"baz"}}');
+        });
+
+        it('shouldn\'t copy over default value if new value is undefined', () => {
+            const obj = {};
+            expect(serializer.deserialize<ClassWithDefaultValue>(obj, ClassWithDefaultValue).id).to.equal('default');
         });
     });
 });

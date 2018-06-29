@@ -203,7 +203,10 @@ export class Serializer {
                 result[targetPropertyName] = this.deserialize(obj[originalPropertyName], propClazz, additionalData);
             } else {
                 //Else we can copy the object as it is, since we don't need to create a specific object instance.
-                result[targetPropertyName] = obj[originalPropertyName];
+                //But keep in mind we only want to copy the value if it's not undefined, to avoid overriding default values.
+                if (obj[originalPropertyName] !== undefined) {
+                    result[targetPropertyName] = obj[originalPropertyName];
+                }
             }
         }
         return result as T;
