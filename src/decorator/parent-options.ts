@@ -4,4 +4,5 @@
 export interface ParentOptions {
     discriminatorField: string;
     allowSelf?: boolean;
+    trackBy?: (value: any) => string;
 }

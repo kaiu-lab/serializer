@@ -124,7 +124,17 @@ export class Registry {
             return clazz as Instantiable;
         }
 
-        const discriminatorValue = obj[registration.parentOptions.discriminatorField];
+        //Let's get the trackBy method to have the key from current value.
+        const trackBy = registration.parentOptions.trackBy;
+
+        let discriminatorValue: string;
+
+        if (trackBy === undefined) {
+            discriminatorValue = obj[registration.parentOptions.discriminatorField];
+        } else {
+            discriminatorValue = trackBy(obj[registration.parentOptions.discriminatorField]);
+        }
+
         // In case of missing discriminator value...
         if (discriminatorValue === undefined || discriminatorValue === null) {
             // ...check if the parent allows itself and no explicit discriminators are defined.

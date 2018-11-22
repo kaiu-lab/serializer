@@ -29,6 +29,19 @@ class ThirdLevelB1 extends SecondLevelB {
 class ThirdLevelB2 extends SecondLevelB {
 }
 
+@Parent({
+    discriminatorField: 'foo',
+    trackBy: (value: any) => {
+        return value[0];
+    }
+})
+class ParentWithTrackBy {
+    foo: string[];
+}
+
+class ChildWithTrackBy extends ParentWithTrackBy {
+}
+
 
 describe('Registry service', () => {
     let registry: Registry;
@@ -331,6 +344,22 @@ describe('Registry service', () => {
             expect(() => expect(registry.findClass(SecondLevelA, {})))
                 .to.throw(TypeError, expectedError);
 
+        });
+    });
+
+    describe('Custom trackBy method tests', () => {
+        it('Should allow multiple registrations of the same class under multiple discriminator values', () => {
+            registry.add([
+                    {
+                        parent: ParentWithTrackBy,
+                        children: {
+                            'valueFromTrackBy': ChildWithTrackBy
+                        },
+                    },
+                ],
+            );
+
+            expect(registry.findClass(ParentWithTrackBy, {foo: ['valueFromTrackBy']})).to.equal(ChildWithTrackBy);
         });
     });
 
