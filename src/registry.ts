@@ -132,7 +132,7 @@ export class Registry {
         if (trackBy === undefined) {
             discriminatorValue = obj[registration.parentOptions.discriminatorField];
         } else {
-            discriminatorValue = trackBy(obj[registration.parentOptions.discriminatorField]);
+            discriminatorValue = trackBy(obj[registration.parentOptions.discriminatorField], obj);
         }
 
         // In case of missing discriminator value...
