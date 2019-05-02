@@ -20,21 +20,22 @@ import { ParentOptions } from './decorator/parent-options';
  * ]
  * ```
  */
-export interface Registration {
+export interface Registration<T = any> {
     /**
-     * The class holding the discrimination logic that should be used for this entry.
+     * The class that all children have to extend no matter what.
+     *
+     * It can contain the discrimination logic, but if you want to handle inheritance constraint and discriminator separately,
+     * you have to specify the handler class in `discriminatorHandler`
      */
-    parent: Class;
+    parent: Class<T>;
     /**
-     * If you want to introduce discrimination logic on a class provided by an external library,
-     * You have to use inheritFrom in order to give the parent class that should be used for
-     * inheritence checks inside the serializer
+     * Used to define which class handles the discrimination logic, defaults to `parent`'s value.
      */
-    inheritFrom?: Class;
+    discriminatorHandler?: Class;
     /**
      * Possible children, by key.
      */
-    children: { [index: string]: Class };
+    children: { [index: string]: Class<T> };
 }
 
 /**

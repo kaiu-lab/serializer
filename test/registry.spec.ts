@@ -42,6 +42,16 @@ class ParentWithTrackBy {
 class ChildWithTrackBy extends ParentWithTrackBy {
 }
 
+@Parent({
+    discriminatorField: 'foo',
+    trackBy: (value: any) => {
+        return value[1];
+    }
+})
+class DiscriminatorHandler {
+    foo: string[];
+}
+
 
 describe('Registry service', () => {
     let registry: Registry;
@@ -360,6 +370,23 @@ describe('Registry service', () => {
             );
 
             expect(registry.findClass(ParentWithTrackBy, {foo: ['valueFromTrackBy']})).to.equal(ChildWithTrackBy);
+        });
+    });
+
+    describe('DiscriminatorHandler tests', () => {
+        it('Should use discriminatorHandler field when it has been set', () => {
+            registry.add([
+                    {
+                        parent: ParentWithTrackBy,
+                        discriminatorHandler: DiscriminatorHandler,
+                        children: {
+                            'valueFromTrackBy': ChildWithTrackBy
+                        },
+                    },
+                ],
+            );
+
+            expect(registry.findClass(ParentWithTrackBy, {foo: ['nope', 'valueFromTrackBy']})).to.equal(ChildWithTrackBy);
         });
     });
 

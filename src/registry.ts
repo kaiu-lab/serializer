@@ -79,17 +79,17 @@ export class Registry {
             } else {
                 children = reg.children;
 
+                const discriminatorHandler = reg.discriminatorHandler || reg.parent;
+
                 //Get the metadata for this parent and check if it has the @Parent decorator.
-                parentOptions = Reflect.getOwnMetadata(METADATA_PARENT, reg.parent);
+                parentOptions = Reflect.getOwnMetadata(METADATA_PARENT, discriminatorHandler);
                 if (parentOptions === undefined) {
-                    throw new TypeError(`Class ${reg.parent.name} needs a @Parent decorator to be registered`);
+                    throw new TypeError(`Class ${discriminatorHandler.name} needs a @Parent decorator to be registered`);
                 }
             }
 
             // Flag to know if the parent is registered among its children.
             let parentHasExplicitDiscriminator = false;
-
-            const inheritFrom = reg.inheritFrom || reg.parent;
 
             for (const value in reg.children) {
                 const child = reg.children[value];
@@ -103,8 +103,8 @@ export class Registry {
                     parentHasExplicitDiscriminator = true;
                 } else {
                     //Check if the child extends the parent
-                    if (!(child.prototype instanceof inheritFrom)) {
-                        throw new TypeError(`Class ${child.name} needs to extend ${inheritFrom.name} to be registered as a child`);
+                    if (!(child.prototype instanceof reg.parent)) {
+                        throw new TypeError(`Class ${child.name} needs to extend ${reg.parent.name} to be registered as a child`);
                     }
                 }
             }
