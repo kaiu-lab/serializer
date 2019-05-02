@@ -89,6 +89,8 @@ export class Registry {
             // Flag to know if the parent is registered among its children.
             let parentHasExplicitDiscriminator = false;
 
+            const inheritFrom = reg.inheritFrom || reg.parent;
+
             for (const value in reg.children) {
                 const child = reg.children[value];
 
@@ -101,8 +103,8 @@ export class Registry {
                     parentHasExplicitDiscriminator = true;
                 } else {
                     //Check if the child extends the parent
-                    if (!(child.prototype instanceof reg.parent)) {
-                        throw new TypeError(`Class ${child.name} needs to extend ${reg.parent.name} to be registered as a child`);
+                    if (!(child.prototype instanceof inheritFrom)) {
+                        throw new TypeError(`Class ${child.name} needs to extend ${inheritFrom.name} to be registered as a child`);
                     }
                 }
             }

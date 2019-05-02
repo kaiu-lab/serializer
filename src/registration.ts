@@ -21,7 +21,19 @@ import { ParentOptions } from './decorator/parent-options';
  * ```
  */
 export interface Registration {
+    /**
+     * The class holding the discrimination logic that should be used for this entry.
+     */
     parent: Class;
+    /**
+     * If you want to introduce discrimination logic on a class provided by an external library,
+     * You have to use inheritFrom in order to give the parent class that should be used for
+     * inheritence checks inside the serializer
+     */
+    inheritFrom?: Class;
+    /**
+     * Possible children, by key.
+     */
     children: { [index: string]: Class };
 }
 
