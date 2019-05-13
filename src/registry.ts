@@ -79,10 +79,12 @@ export class Registry {
             } else {
                 children = reg.children;
 
+                const discriminatorHandler = reg.discriminatorHandler || reg.parent;
+
                 //Get the metadata for this parent and check if it has the @Parent decorator.
-                parentOptions = Reflect.getOwnMetadata(METADATA_PARENT, reg.parent);
+                parentOptions = Reflect.getOwnMetadata(METADATA_PARENT, discriminatorHandler);
                 if (parentOptions === undefined) {
-                    throw new TypeError(`Class ${reg.parent.name} needs a @Parent decorator to be registered`);
+                    throw new TypeError(`Class ${discriminatorHandler.name} needs a @Parent decorator to be registered`);
                 }
             }
 

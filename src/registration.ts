@@ -20,9 +20,22 @@ import { ParentOptions } from './decorator/parent-options';
  * ]
  * ```
  */
-export interface Registration {
-    parent: Class;
-    children: { [index: string]: Class };
+export interface Registration<T = any> {
+    /**
+     * The class that all children have to extend no matter what.
+     *
+     * It can contain the discrimination logic, but if you want to handle inheritance constraint and discriminator separately,
+     * you have to specify the handler class in `discriminatorHandler`
+     */
+    parent: Class<T>;
+    /**
+     * Used to define which class handles the discrimination logic, defaults to `parent`'s value.
+     */
+    discriminatorHandler?: Class;
+    /**
+     * Possible children, by key.
+     */
+    children: { [index: string]: Class<T> };
 }
 
 /**
