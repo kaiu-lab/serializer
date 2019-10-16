@@ -11,6 +11,9 @@
 
 - [About](#about)
 - [Installation](#installation)
+- [Usage](#usage)
+- [Usage with Angular](#usage-with-angular)
+- [Advanced Usage](#advanced-usage)
 - [Documentation](#documentation)
 - [Development](#development)
 - [License](#license)
@@ -76,6 +79,10 @@ console.log(serializer.serialize(foo)); // Will print '{ "bar": "baz" }'
 ```
 
 More details: [Class Serializer](https://kaiu-lab.github.io/serializer/classes/serializer.html)
+
+## Usage with Angular
+
+In order to use the serializer properly inside an Angular application, we created an angular wrapper to provide this serializer as an Injectable service: [https://github.com/kaiu-lab/ng-serializer](https://github.com/kaiu-lab/ng-serializer)
 
 ## Advanced Usages
 
