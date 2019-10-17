@@ -11,6 +11,9 @@
 
 - [About](#about)
 - [Installation](#installation)
+- [Usage](#usage)
+- [Usage with Angular](#usage-with-angular)
+- [Advanced Usage](#advanced-usage)
 - [Documentation](#documentation)
 - [Development](#development)
 - [License](#license)
@@ -25,6 +28,166 @@ Install through npm:
 ```bash 
 npm install --save @kaiu/serializer
 ```
+
+## Usage
+
+### Deserialize
+
+```ts
+import { Serializer } from '@kaiu/serializer';
+
+const serializer = new Serializer();
+
+class Foo {
+    bar: string;
+
+    public getUpperCaseBar(): string {
+        return this.bar.toUpperCase();
+    }
+}
+
+const foo = serializer.deserialize<Foo>({ bar: 'baz' }, Foo);
+
+console.log(foo.getUpperCaseBar()); // Will print "BAZ"
+```
+
+More details: [Class Serializer](https://kaiu-lab.github.io/serializer/classes/serializer.html)
+
+### Serialize
+
+```ts
+import { Serializer, Transient } from '@kaiu/serializer';
+
+const serializer = new Serializer();
+
+class Foo {
+    bar: string;
+    
+    @Transient()
+    secret: string;
+
+    public getUpperCaseBar(): string {
+        return this.bar.toUpperCase();
+    }
+}
+
+const foo = new Foo();
+foo.bar = 'baz';
+foo.secret = 's3cr3t';
+
+console.log(serializer.serialize(foo)); // Will print '{ "bar": "baz" }'
+```
+
+More details: [Class Serializer](https://kaiu-lab.github.io/serializer/classes/serializer.html)
+
+## Usage with Angular
+
+In order to use the serializer properly inside an Angular application, we created an angular wrapper to provide this serializer as an Injectable service: [https://github.com/kaiu-lab/ng-serializer](https://github.com/kaiu-lab/ng-serializer)
+
+## Advanced Usages
+
+### Deep class fields
+
+```ts
+    import { Serializer, DeserializeAs } from '@kaiu/serializer';
+
+    class Bar {
+        baz: string;
+   
+       public getUpperCaseBaz(): string {
+           return this.baz.toUpperCase();
+       }   
+    } 
+
+   class Foo {
+       @DeserializeAs(Bar) 
+       bar: Bar;
+   }
+    
+    const foo = serializer.deserialize<Foo>({ bar: { baz: 'baz' } }, Foo);
+
+    console.log(foo.bar.getUpperCaseBar()); // Will print "BAZ"
+```
+
+More details: [DeserializeAs](https://kaiu-lab.github.io/serializer/globals.html#deserializeas)
+
+### Arrays
+
+```ts
+import { Serializer } from '@kaiu/serializer';
+
+const serializer = new Serializer();
+
+class Foo {
+    bar: string;
+
+    public getUpperCaseBar(): string {
+        return this.bar.toUpperCase();
+    }
+}
+
+const foo = serializer.deserialize<Foo>([{ bar: 'baz' }, { bar: 'buz' }], [Foo]);
+
+console.log(foos[1].getUpperCaseBar()); // Will print "BUZ"
+```
+
+### Discriminant field
+
+```ts
+import { Serializer, Registry, Parent } from '@kaiu/serializer';
+
+@Parent({
+    discriminatorField: 'type',
+    allowSelf: true // This one is optional.
+})
+export class Vehicle {
+     type: string;
+     color: string;
+
+     public getDescription(): string {
+        return 'I am just a vehicle';
+     }
+}
+
+export class Car extends Vehicle {
+    public getDescription(): string {
+        return 'I am a car, I can move using wheels';
+    }
+}
+
+const registry = new Registry();
+
+registry.add([
+     {
+         parent: Vehicle,
+         children: {
+             car: Car
+         }
+     }
+]);
+
+const serializer = new Serializer(registry);
+
+const foo = serializer.deserialize<Vehicle>({type: 'car', color: 'red'}, Vehicle);
+
+console.log(foo.getDescription()); // Will print "I am a car, I can move using wheels"
+```
+
+More details: [Class Registry](https://kaiu-lab.github.io/serializer/classes/registry.html)
+
+### Property mapping
+
+```ts
+export class Example{
+     @DeserializeFieldName('bar')
+     foo: string;
+}
+
+const result = serializer.deserialize<Example>({ bar: 'hey' }, Example);
+console.log(result.foo); // Will print 'hey'
+```
+
+More details: [DeserializeFieldName](https://kaiu-lab.github.io/serializer/globals.html#deserializefieldname)
 
 ## Documentation
 
