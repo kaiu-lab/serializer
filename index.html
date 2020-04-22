@@ -1,0 +1,356 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>@kaiu/serializer</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.js" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">@kaiu/serializer</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1> @kaiu/serializer</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<h1 id="serializer">serializer</h1>
+				<p><a href="https://travis-ci.org/kaiu-lab/serializer"><img src="https://travis-ci.org/kaiu-lab/serializer.svg?branch=master" alt="Build Status"></a>
+					<a href="https://codecov.io/gh/kaiu-lab/serializer"><img src="https://codecov.io/gh/kaiu-lab/serializer/branch/master/graph/badge.svg" alt="codecov"></a>
+					<a href="https://www.npmjs.com/package/@kaiu/serializer"><img src="https://badge.fury.io/js/%40kaiu%2Fserializer.svg" alt="npm version"></a>
+					<a href="https://david-dm.org/kaiu-lab/serializer?type=dev"><img src="https://david-dm.org/kaiu-lab/serializer/dev-status.svg" alt="devDependency Status"></a>
+					<a href="https://github.com/kaiu-lab/serializer/issues"><img src="https://img.shields.io/github/issues/kaiu-lab/serializer.svg" alt="GitHub issues"></a>
+					<a href="https://github.com/kaiu-lab/serializer/stargazers"><img src="https://img.shields.io/github/stars/kaiu-lab/serializer.svg" alt="GitHub stars"></a>
+				<a href="https://raw.githubusercontent.com/kaiu-lab/serializer/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="GitHub license"></a></p>
+				<h2 id="table-of-contents">Table of contents</h2>
+				<ul>
+					<li><a href="#about">About</a></li>
+					<li><a href="#installation">Installation</a></li>
+					<li><a href="#usage">Usage</a></li>
+					<li><a href="#usage-with-angular">Usage with Angular</a></li>
+					<li><a href="#advanced-usage">Advanced Usage</a></li>
+					<li><a href="#documentation">Documentation</a></li>
+					<li><a href="#development">Development</a></li>
+					<li><a href="#license">License</a></li>
+				</ul>
+				<h2 id="about">About</h2>
+				<p>Serializer is a serialization library written in Typescript made to handle typing in deserialized objects.</p>
+				<h2 id="installation">Installation</h2>
+				<p>Install through npm:</p>
+				<pre><code class="lang-bash">npm install --save @kaiu/serializer
+</code></pre>
+				<h2 id="usage">Usage</h2>
+				<h3 id="deserialize">Deserialize</h3>
+				<pre><code class="lang-ts"><span class="hljs-keyword">import</span> { Serializer } <span class="hljs-keyword">from</span> <span class="hljs-string">'@kaiu/serializer'</span>;
+
+<span class="hljs-keyword">const</span> serializer = <span class="hljs-keyword">new</span> Serializer();
+
+<span class="hljs-keyword">class</span> Foo {
+    bar: <span class="hljs-built_in">string</span>;
+
+    <span class="hljs-keyword">public</span> getUpperCaseBar(): <span class="hljs-built_in">string</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.bar.toUpperCase();
+    }
+}
+
+<span class="hljs-keyword">const</span> foo = serializer.deserialize&lt;Foo&gt;({ bar: <span class="hljs-string">'baz'</span> }, Foo);
+
+<span class="hljs-built_in">console</span>.log(foo.getUpperCaseBar()); <span class="hljs-comment">// Will print "BAZ"</span>
+</code></pre>
+				<p>More details: <a href="https://kaiu-lab.github.io/serializer/classes/serializer.html">Class Serializer</a></p>
+				<h3 id="serialize">Serialize</h3>
+				<pre><code class="lang-ts"><span class="hljs-keyword">import</span> { Serializer, Transient } <span class="hljs-keyword">from</span> <span class="hljs-string">'@kaiu/serializer'</span>;
+
+<span class="hljs-keyword">const</span> serializer = <span class="hljs-keyword">new</span> Serializer();
+
+<span class="hljs-keyword">class</span> Foo {
+    bar: <span class="hljs-built_in">string</span>;
+
+    <span class="hljs-meta">@Transient</span>()
+    secret: <span class="hljs-built_in">string</span>;
+
+    <span class="hljs-keyword">public</span> getUpperCaseBar(): <span class="hljs-built_in">string</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.bar.toUpperCase();
+    }
+}
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">new</span> Foo();
+foo.bar = <span class="hljs-string">'baz'</span>;
+foo.secret = <span class="hljs-string">'s3cr3t'</span>;
+
+<span class="hljs-built_in">console</span>.log(serializer.serialize(foo)); <span class="hljs-comment">// Will print '{ "bar": "baz" }'</span>
+</code></pre>
+				<p>More details: <a href="https://kaiu-lab.github.io/serializer/classes/serializer.html">Class Serializer</a></p>
+				<h2 id="usage-with-angular">Usage with Angular</h2>
+				<p>In order to use the serializer properly inside an Angular application, we created an angular wrapper to provide this serializer as an Injectable service: <a href="https://github.com/kaiu-lab/ng-serializer">https://github.com/kaiu-lab/ng-serializer</a></p>
+				<h2 id="advanced-usages">Advanced Usages</h2>
+				<h3 id="deep-class-fields">Deep class fields</h3>
+				<pre><code class="lang-ts">    <span class="hljs-keyword">import</span> { Serializer, DeserializeAs } <span class="hljs-keyword">from</span> <span class="hljs-string">'@kaiu/serializer'</span>;
+
+    <span class="hljs-keyword">class</span> Bar {
+        baz: <span class="hljs-built_in">string</span>;
+
+       <span class="hljs-keyword">public</span> getUpperCaseBaz(): <span class="hljs-built_in">string</span> {
+           <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.baz.toUpperCase();
+       }   
+    } 
+
+   <span class="hljs-keyword">class</span> Foo {
+       <span class="hljs-meta">@DeserializeAs</span>(Bar) 
+       bar: Bar;
+   }
+
+    <span class="hljs-keyword">const</span> foo = serializer.deserialize&lt;Foo&gt;({ bar: { baz: <span class="hljs-string">'baz'</span> } }, Foo);
+
+    <span class="hljs-built_in">console</span>.log(foo.bar.getUpperCaseBar()); <span class="hljs-comment">// Will print "BAZ"</span>
+</code></pre>
+				<p>More details: <a href="https://kaiu-lab.github.io/serializer/globals.html#deserializeas">DeserializeAs</a></p>
+				<h3 id="arrays">Arrays</h3>
+				<pre><code class="lang-ts"><span class="hljs-keyword">import</span> { Serializer } <span class="hljs-keyword">from</span> <span class="hljs-string">'@kaiu/serializer'</span>;
+
+<span class="hljs-keyword">const</span> serializer = <span class="hljs-keyword">new</span> Serializer();
+
+<span class="hljs-keyword">class</span> Foo {
+    bar: <span class="hljs-built_in">string</span>;
+
+    <span class="hljs-keyword">public</span> getUpperCaseBar(): <span class="hljs-built_in">string</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.bar.toUpperCase();
+    }
+}
+
+<span class="hljs-keyword">const</span> foo = serializer.deserialize&lt;Foo&gt;([{ bar: <span class="hljs-string">'baz'</span> }, { bar: <span class="hljs-string">'buz'</span> }], [Foo]);
+
+<span class="hljs-built_in">console</span>.log(foos[<span class="hljs-number">1</span>].getUpperCaseBar()); <span class="hljs-comment">// Will print "BUZ"</span>
+</code></pre>
+				<h3 id="discriminant-field">Discriminant field</h3>
+				<pre><code class="lang-ts"><span class="hljs-keyword">import</span> { Serializer, Registry, Parent } <span class="hljs-keyword">from</span> <span class="hljs-string">'@kaiu/serializer'</span>;
+
+<span class="hljs-meta">@Parent</span>({
+    discriminatorField: <span class="hljs-string">'type'</span>,
+    allowSelf: <span class="hljs-literal">true</span> <span class="hljs-comment">// This one is optional.</span>
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> Vehicle {
+     <span class="hljs-keyword">type</span>: <span class="hljs-built_in">string</span>;
+     color: <span class="hljs-built_in">string</span>;
+
+     <span class="hljs-keyword">public</span> getDescription(): <span class="hljs-built_in">string</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'I am just a vehicle'</span>;
+     }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> Car <span class="hljs-keyword">extends</span> Vehicle {
+    <span class="hljs-keyword">public</span> getDescription(): <span class="hljs-built_in">string</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'I am a car, I can move using wheels'</span>;
+    }
+}
+
+<span class="hljs-keyword">const</span> registry = <span class="hljs-keyword">new</span> Registry();
+
+registry.add([
+     {
+         parent: Vehicle,
+         children: {
+             car: Car
+         }
+     }
+]);
+
+<span class="hljs-keyword">const</span> serializer = <span class="hljs-keyword">new</span> Serializer(registry);
+
+<span class="hljs-keyword">const</span> foo = serializer.deserialize&lt;Vehicle&gt;({<span class="hljs-keyword">type</span>: <span class="hljs-string">'car'</span>, color: <span class="hljs-string">'red'</span>}, Vehicle);
+
+<span class="hljs-built_in">console</span>.log(foo.getDescription()); <span class="hljs-comment">// Will print "I am a car, I can move using wheels"</span>
+</code></pre>
+				<p>More details: <a href="https://kaiu-lab.github.io/serializer/classes/registry.html">Class Registry</a></p>
+				<h3 id="property-mapping">Property mapping</h3>
+				<pre><code class="lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> Example{
+     <span class="hljs-meta">@DeserializeFieldName</span>(<span class="hljs-string">'bar'</span>)
+     foo: <span class="hljs-built_in">string</span>;
+}
+
+<span class="hljs-keyword">const</span> result = serializer.deserialize&lt;Example&gt;({ bar: <span class="hljs-string">'hey'</span> }, Example);
+<span class="hljs-built_in">console</span>.log(result.foo); <span class="hljs-comment">// Will print 'hey'</span>
+</code></pre>
+				<p>More details: <a href="https://kaiu-lab.github.io/serializer/globals.html#deserializefieldname">DeserializeFieldName</a></p>
+				<h2 id="documentation">Documentation</h2>
+				<p>Everything is detailed on our <a href="https://kaiu-lab.github.io/serializer/">documentation website</a>.</p>
+				<h2 id="development">Development</h2>
+				<h3 id="prepare-your-environment">Prepare your environment</h3>
+				<ul>
+					<li>Install <a href="http://nodejs.org/">Node.js</a> and NPM</li>
+					<li>Install local dev dependencies: <code>npm install</code> while current directory is this repo</li>
+				</ul>
+				<h3 id="testing">Testing</h3>
+				<p>Run <code>npm test</code> to run tests once or <code>npm run test:watch</code> to continually run tests.</p>
+				<h3 id="release">Release</h3>
+				<ul>
+					<li>Bump the version in package.json (once the module hits 1.0 this will become automatic)<pre><code class="lang-bash">npm run release
+</code></pre>
+					</li>
+				</ul>
+				<h2 id="license">License</h2>
+				<p>MIT</p>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-class">
+						<a href="classes/registry.html" class="tsd-kind-icon">Registry</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/serializer.html" class="tsd-kind-icon">Serializer</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/parentoptions.html" class="tsd-kind-icon">Parent<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-has-type-parameter">
+						<a href="interfaces/registration.html" class="tsd-kind-icon">Registration</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#deserializeas" class="tsd-kind-icon">Deserialize<wbr>As</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#deserializefieldname" class="tsd-kind-icon">Deserialize<wbr>Field<wbr>Name</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#fieldname" class="tsd-kind-icon">Field<wbr>Name</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#parent" class="tsd-kind-icon">Parent</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#serializefieldname" class="tsd-kind-icon">Serialize<wbr>Field<wbr>Name</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#transient" class="tsd-kind-icon">Transient</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="http://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>
